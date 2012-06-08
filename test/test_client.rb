@@ -47,7 +47,7 @@ describe Klomp::Client do
 
   it 'sends requests and gets responses' do
     client = Klomp::Client.new(@uris).connect
-    body  = { 'random_string' => rand(36**128).to_s(36) }
+    body  = { 'body' => rand(36**128).to_s(36) }
 
     client.send(@destination, body, :ack=>'client')
 
@@ -64,7 +64,7 @@ describe Klomp::Client do
 
   it 'automatically publishes responses to the reply-to destination' do
     client        = Klomp::Client.new(@uris).connect
-    reply_to_body = { 'random_string' => rand(36**128).to_s(36) }
+    reply_to_body = { 'reply_to_body' => rand(36**128).to_s(36) }
 
     client.send(@destination, nil, { 'reply-to' => @destination })
 

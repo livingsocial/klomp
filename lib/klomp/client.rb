@@ -23,42 +23,21 @@ module Klomp
       end
     end
 
-    def connect
-      ([@write_conn] + @read_conn).uniq.each { |c| c.connect }
-      self
-    end
-
-    def disconnect(headers={})
-      ([@write_conn] + @read_conn).uniq.each { |c| c.disconnect(headers) }
-    end
-
-    def ack(*args)
-      @read_conn.each { |c| c.ack(*args) }
-    end
-
-    def nack(*args)
-      @read_conn.each { |c| c.nack(*args) }
-    end
-
-    def beat
-      ([@write_conn] + @read_conn).uniq.each { |c| c.beat }
-    end
-
-    def send(destination, body=nil, headers={}, &block)
-      if @options[:translate_json] && [Array, Hash].any? { |type| body.kind_of?(type) }
-        body = body.to_json
-        headers[:'content-type'] = 'application/json'
+    def send(*args, &block)
+      if @options[:translate_json] && [Array, Hash].any? { |type| args[1].kind_of?(type) }
+        args[1] = args[1].to_json
+        args[2] = {} if args[2].nil?
+        args[2][:'content-type'] = 'application/json'
       else
-        body = body.to_s
+        args[1] = args[1].to_s
       end
-      receipt = @write_conn.puts(destination, body, headers)
-      yield receipt if block_given?
+      @write_conn.send(*args, &block)
     end
 
-    def subscribe(destination, headers={}, &block)
+    def subscribe(*args, &block)
       frames = []
       @read_conn.each do |c|
-        frames << c.subscribe(destination, headers) do |msg|
+        frames << c.subscribe(*args) do |msg|
           if @options[:translate_json]
             msg.body = begin
               JSON.parse(msg.body)
@@ -79,8 +58,29 @@ module Klomp
       frames
     end
 
-    def unsubscribe(frame_or_id, headers={})
-      frame_or_id.each { |obj| @read_conn.each { |c| c.unsubscribe(obj, headers) } }
+    def method_missing(method, *args, &block)
+      write_only_methods = [
+        :abort,
+        :begin,
+        :commit,
+      ]
+      read_only_methods = [
+        :ack,
+        :nack,
+        :unsubscribe
+      ]
+      returns = {
+        :connect => self
+      }
+
+      result = if write_only_methods.include?(method)
+        @write_conn.send(method, *args, &block)
+      elsif read_only_methods.include?(method)
+        @read_conn.map { |c| c.__send__(method, *args, &block) }
+      else
+        ([@write_conn] + @read_conn).uniq.map { |c| c.__send__(method, *args) }
+      end
+      returns.include?(method) ? returns[method] : result
     end
 
   end
