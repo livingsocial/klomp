@@ -49,13 +49,12 @@ describe Klomp::Client do
     client = Klomp::Client.new(@uris).connect
     body  = { 'random_string' => rand(36**128).to_s(36) }
 
-    client.send(@destination, body) do |r|
-      assert_kind_of OnStomp::Components::Frame, r
-    end
+    client.send(@destination, body, :ack=>'client')
 
     got_message = false
     client.subscribe(@destination) do |msg|
       got_message = true if msg.body == body
+      client.ack(msg)
     end
     sleep 1
     assert got_message

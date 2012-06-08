@@ -14,7 +14,7 @@ module Klomp
         :retry_delay    => 1
       }) { |memo,(k,v)| memo.merge({k => v}) if memo.has_key?(k) }
 
-      if uri.respond_to?(:each)
+      if uri.is_a?(Array)
         @write_conn = OnStomp::Failover::Client.new(uri, ofc_options)
         @read_conn = uri.inject([]) { |memo,obj| memo + [OnStomp::Failover::Client.new([obj], ofc_options)] }
       else
@@ -28,8 +28,16 @@ module Klomp
       self
     end
 
-    def disconnect
-      ([@write_conn] + @read_conn).uniq.each { |c| c.disconnect }
+    def disconnect(headers={})
+      ([@write_conn] + @read_conn).uniq.each { |c| c.disconnect(headers) }
+    end
+
+    def ack(*args)
+      @read_conn.each { |c| c.ack(*args) }
+    end
+
+    def nack(*args)
+      @read_conn.each { |c| c.nack(*args) }
     end
 
     def beat
@@ -37,7 +45,6 @@ module Klomp
     end
 
     def send(destination, body=nil, headers={}, &block)
-      headers ||= {}
       if @options[:translate_json] && [Array, Hash].any? { |type| body.kind_of?(type) }
         body = body.to_json
         headers[:'content-type'] = 'application/json'
@@ -49,7 +56,6 @@ module Klomp
     end
 
     def subscribe(destination, headers={}, &block)
-      headers ||= {}
       frames = []
       @read_conn.each do |c|
         frames << c.subscribe(destination, headers) do |msg|
@@ -60,9 +66,13 @@ module Klomp
               msg.body
             end
           end
-          reply_body, reply_headers = yield msg
+          reply_args = yield msg
           if @options[:auto_reply_to] && !msg.headers[:'reply-to'].nil?
-            send(msg.headers[:'reply-to'], reply_body, reply_headers)
+            if reply_args.is_a?(Array)
+              send(msg.headers[:'reply-to'], *reply_args)
+            else
+              send(msg.headers[:'reply-to'], reply_args)
+            end
           end
         end
       end
@@ -70,7 +80,6 @@ module Klomp
     end
 
     def unsubscribe(frame_or_id, headers={})
-      headers ||= {}
       frame_or_id.each { |obj| @read_conn.each { |c| c.unsubscribe(obj, headers) } }
     end
 
