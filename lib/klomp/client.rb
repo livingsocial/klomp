@@ -24,14 +24,16 @@ module Klomp
     end
 
     def connect
-      @write_conn.connect
-      @read_conn.each { |c| c.connect }
+      ([@write_conn] + @read_conn).uniq.each { |c| c.connect }
       self
     end
 
     def disconnect
-      @write_conn.disconnect if @write_conn.connected?
-      @read_conn.select { |c| c.connected? }.each { |c| c.disconnect }
+      ([@write_conn] + @read_conn).uniq.each { |c| c.disconnect }
+    end
+
+    def beat
+      ([@write_conn] + @read_conn).uniq.each { |c| c.beat }
     end
 
     def send(destination, body=nil, headers={}, &block)

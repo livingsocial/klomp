@@ -41,6 +41,10 @@ describe Klomp::Client do
     refute client.write_conn.connected?
   end
 
+  it 'sends heartbeat' do
+    client = Klomp::Client.new(@uris).connect.beat
+  end
+
   it 'sends requests and gets responses' do
     client = Klomp::Client.new(@uris).connect
     body  = { 'random_string' => rand(36**128).to_s(36) }
