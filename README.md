@@ -8,7 +8,7 @@ one broker at a time, but will consume from all brokers simultaneously. This is
 a slight improvement over the regular [OnStomp::Failover::Client](http://mdvlrb.com/onstomp/OnStomp/Failover/Client.html)
 which handles all publishing and subscribing through a single "active" broker.
 This traditional one-broker-at-a-time technique can lead to a split-brain
-scenerio in which messages are only received by a subset of your STOMP clients.
+scenario in which messages are only received by a subset of your STOMP clients.
 By consuming from all brokers simultaneously, Klomp ensures that no message is
 left behind.
 
@@ -24,7 +24,16 @@ sent to the reply-to destination.
 
 ## Example usage
 
-See examples in test_client.rb.
+The goal is that you should be able to use most (if not all) of the standard
+OnStomp API (see [UserNarrative](https://github.com/meadvillerb/onstomp/blob/master/extra_doc/UserNarrative.md))
+via a `Klomp::Client`:
+
+    client = Klomp::Client.new([ ... ])
+
+However, there will be some differences in the API due to how `Klomp::Client`
+manages connections. For example, while the `connected?` method normally
+returns a boolean value, Klomp's `connected?` will return an array of booleans
+(i.e. one result for each broker).
 
 ## Developers
 
