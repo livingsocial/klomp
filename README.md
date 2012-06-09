@@ -25,7 +25,7 @@ sent to the reply-to destination.
 ## Example usage
 
 The goal is that you should be able to use most (if not all) of the standard
-OnStomp API (see [UserNarrative](https://github.com/meadvillerb/onstomp/blob/master/extra_doc/UserNarrative.md))
+OnStomp API (see [OnStomp's UserNarrative](https://github.com/meadvillerb/onstomp/blob/master/extra_doc/UserNarrative.md))
 via a `Klomp::Client`:
 
     client = Klomp::Client.new([ ... ])
