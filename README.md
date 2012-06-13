@@ -40,9 +40,9 @@ returns a boolean value, Klomp's `connected?` will return an array of booleans
 
 <table>
   <tr>
-    <td>Key</td>
-    <td>Default</td>
-    <td>Description</td>
+    <th>Key</th>
+    <th>Default value</th>
+    <th>Description</th>
   </tr>
   <tr>
     <td>:translate_json</td>
