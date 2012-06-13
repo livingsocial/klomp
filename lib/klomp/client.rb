@@ -22,6 +22,7 @@ module Klomp
         @write_conn = OnStomp::Failover::Client.new([uri], ofc_options)
         @read_conn = [@write_conn]
       end
+      @all_conn = ([@write_conn] + @read_conn).uniq
     end
 
     def send(*args, &block)
@@ -59,29 +60,30 @@ module Klomp
       frames
     end
 
-    def method_missing(method, *args, &block)
-      write_only_methods = [
-        :abort,
-        :begin,
-        :commit,
-      ]
-      read_only_methods = [
-        :ack,
-        :nack,
-        :unsubscribe
-      ]
-      returns = {
-        :connect => self
-      }
+    WRITE_ONLY_METHODS = [
+      :abort,
+      :begin,
+      :commit,
+    ]
 
-      result = if write_only_methods.include?(method)
+    READ_ONLY_METHODS = [
+      :ack,
+      :nack,
+      :unsubscribe,
+    ]
+
+    def method_missing(method, *args, &block)
+      case method
+      when *WRITE_ONLY_METHODS
         @write_conn.send(method, *args, &block)
-      elsif read_only_methods.include?(method)
-        @read_conn.map { |c| c.__send__(method, *args, &block) }
+      when *READ_ONLY_METHODS
+        @read_conn.map {|c| c.__send__(method, *args, &block) }
+      when :connect
+        @all_conn.each {|c| c.connect}
+        self
       else
-        ([@write_conn] + @read_conn).uniq.map { |c| c.__send__(method, *args) }
+        @all_conn.map {|c| c.__send__(method, *args) }
       end
-      returns.include?(method) ? returns[method] : result
     end
 
   end
