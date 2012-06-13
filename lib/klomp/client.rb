@@ -28,6 +28,7 @@ module Klomp
         @read_conn = [@write_conn]
       end
       @all_conn = ([@write_conn] + @read_conn).uniq
+      configure_connections
     end
 
     def send(*args, &block)
@@ -98,6 +99,14 @@ module Klomp
       end
     end
 
+    private
+    def configure_connections
+      @all_conn.each do |c|
+        c.on_failover_connect_failure do
+          raise if OnStomp::FatalConnectionError === $!
+        end
+      end
+    end
   end
 
 end

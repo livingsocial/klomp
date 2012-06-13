@@ -34,6 +34,12 @@ describe Klomp::Client do
     client.disconnect
   end
 
+  it 'raises an error if authentication fails' do
+    assert_raises OnStomp::ConnectFailedError do
+      Klomp::Client.new(@uris.first.sub('password', 'psswrd')).connect
+    end
+  end
+
   it 'disconnnects' do
     client = Klomp::Client.new(@uris.first).connect
     assert client.write_conn.connected?
