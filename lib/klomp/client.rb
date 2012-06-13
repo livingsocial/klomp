@@ -1,18 +1,24 @@
+require 'onstomp'
+require 'onstomp/failover'
+require 'json'
+require 'logger'
+
 module Klomp
 
   class Client
     attr_reader :options, :read_conn, :write_conn
 
     def initialize(uri, options={})
-      @options ||= {
+      @options = {
         :translate_json => true,
-        :auto_reply_to  => true
-      }
+        :auto_reply_to  => true,
+        :logger         => false
+      }.merge(options || {})
 
-      ofc_options = options.inject({
+      ofc_options = @options.inject({
         :retry_attempts => -1,
         :retry_delay    => 1
-      }) { |memo,(k,v)| memo.merge({k => v}) if memo.has_key?(k) }
+      }) { |memo,(k,v)| memo.has_key?(k) ? memo.merge({k => v}) : memo }
 
       if uri.is_a?(Array)
         @write_conn = OnStomp::Failover::Client.new(uri, ofc_options)
@@ -31,13 +37,16 @@ module Klomp
       else
         args[1] = args[1].to_s
       end
+      log.info("[Sending] Destination=#{args[0]} Body=#{args[1]} Headers=#{args[2]}") if log
       @write_conn.send(*args, &block)
     end
+    alias :puts :send
 
     def subscribe(*args, &block)
       frames = []
       @read_conn.each do |c|
         frames << c.subscribe(*args) do |msg|
+          log.info("[Received] Body=#{msg.body} Headers=#{msg.headers.to_hash.sort}") if log
           if @options[:translate_json]
             msg.body = begin
               JSON.parse(msg.body)
@@ -56,6 +65,10 @@ module Klomp
         end
       end
       frames
+    end
+
+    def log
+      @options[:logger]
     end
 
     def method_missing(method, *args, &block)

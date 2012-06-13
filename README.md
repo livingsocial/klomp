@@ -16,7 +16,8 @@ left behind.
 Ruby and JSON objects.
 
 * If a reply-to header is found in a message, a response is automatically
-sent to the reply-to destination.
+sent to the reply-to destination. The response will be the return value of the
+subscribe block.
 
 ## Installation
 
@@ -34,6 +35,31 @@ However, there will be some differences in the API due to how `Klomp::Client`
 manages connections. For example, while the `connected?` method normally
 returns a boolean value, Klomp's `connected?` will return an array of booleans
 (i.e. one result for each broker).
+
+### Additional options for Klomp::Client
+
+<table>
+  <tr>
+    <td>Key</td>
+    <td>Default</td>
+    <td>Description</td>
+  </tr>
+  <tr>
+    <td>:translate_json</td>
+    <td>true</td>
+    <td>Translate message bodies between native Ruby and JSON objects?</td>
+  </tr>
+  <tr>
+    <td>:auto_reply_to</td>
+    <td>true</td>
+    <td>Automatically send response to reply-to destination?</td>
+  </tr>
+  <tr>
+    <td>:logger</td>
+    <td>false</td>
+    <td>Logger object</td>
+  </tr>
+</table>
 
 ## Developers
 

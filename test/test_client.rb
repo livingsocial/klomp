@@ -41,6 +41,15 @@ describe Klomp::Client do
     refute client.write_conn.connected?
   end
 
+  it 'has a logger' do
+    logger = Logger.new(STDOUT)
+    client = Klomp::Client.new(@uris, :logger=>logger).connect
+
+    assert_equal client.log, logger
+
+    client.disconnect
+  end
+
   it 'sends heartbeat' do
     client = Klomp::Client.new(@uris).connect.beat
   end
@@ -66,7 +75,7 @@ describe Klomp::Client do
     client        = Klomp::Client.new(@uris).connect
     reply_to_body = { 'reply_to_body' => rand(36**128).to_s(36) }
 
-    client.send(@destination, nil, { 'reply-to' => @destination })
+    client.puts(@destination, nil, { 'reply-to' => @destination })
 
     got_message = false
     client.subscribe(@destination) do |msg|
