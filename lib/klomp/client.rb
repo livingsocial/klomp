@@ -22,17 +22,18 @@ module Klomp
 
       if uri.is_a?(Array)
         @write_conn = OnStomp::Failover::Client.new(uri, ofc_options)
-        @read_conn = uri.inject([]) { |memo,obj| memo + [OnStomp::Failover::Client.new([obj], ofc_options)] }
+        @read_conn = uri.map {|obj| OnStomp::Failover::Client.new([obj], ofc_options) }
       else
         @write_conn = OnStomp::Failover::Client.new([uri], ofc_options)
         @read_conn = [@write_conn]
       end
+      @all_conn = ([@write_conn] + @read_conn).uniq
     end
 
     def send(*args, &block)
-      if @options[:translate_json] && [Array, Hash].any? { |type| args[1].kind_of?(type) }
+      if @options[:translate_json] && args[1].respond_to?(:to_json)
         args[1] = args[1].to_json
-        args[2] = {} if args[2].nil?
+        args[2] ||= {}
         args[2][:'content-type'] = 'application/json'
       else
         args[1] = args[1].to_s
@@ -71,29 +72,30 @@ module Klomp
       @options[:logger]
     end
 
-    def method_missing(method, *args, &block)
-      write_only_methods = [
-        :abort,
-        :begin,
-        :commit,
-      ]
-      read_only_methods = [
-        :ack,
-        :nack,
-        :unsubscribe
-      ]
-      returns = {
-        :connect => self
-      }
+    WRITE_ONLY_METHODS = [
+      :abort,
+      :begin,
+      :commit,
+    ]
 
-      result = if write_only_methods.include?(method)
+    READ_ONLY_METHODS = [
+      :ack,
+      :nack,
+      :unsubscribe,
+    ]
+
+    def method_missing(method, *args, &block)
+      case method
+      when *WRITE_ONLY_METHODS
         @write_conn.send(method, *args, &block)
-      elsif read_only_methods.include?(method)
-        @read_conn.map { |c| c.__send__(method, *args, &block) }
+      when *READ_ONLY_METHODS
+        @read_conn.map {|c| c.__send__(method, *args, &block) }
+      when :connect
+        @all_conn.each {|c| c.connect}
+        self
       else
-        ([@write_conn] + @read_conn).uniq.map { |c| c.__send__(method, *args) }
+        @all_conn.map {|c| c.__send__(method, *args) }
       end
-      returns.include?(method) ? returns[method] : result
     end
 
   end
