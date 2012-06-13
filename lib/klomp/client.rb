@@ -25,9 +25,9 @@ module Klomp
     end
 
     def send(*args, &block)
-      if @options[:translate_json] && [Array, Hash].any? { |type| args[1].kind_of?(type) }
+      if @options[:translate_json] && args[1].respond_to?(:to_json)
         args[1] = args[1].to_json
-        args[2] = {} if args[2].nil?
+        args[2] ||= {}
         args[2][:'content-type'] = 'application/json'
       else
         args[1] = args[1].to_s
