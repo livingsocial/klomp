@@ -9,14 +9,15 @@ module Klomp
         :auto_reply_to  => true
       }
 
-      ofc_options = options.inject({
+      ofc_options = {
         :retry_attempts => -1,
         :retry_delay    => 1
-      }) { |memo,(k,v)| memo.merge({k => v}) if memo.has_key?(k) }
+      }
+      (ofc_options.keys & options.keys).each {|k| ofc_options[k] = options[k] }
 
       if uri.is_a?(Array)
         @write_conn = OnStomp::Failover::Client.new(uri, ofc_options)
-        @read_conn = uri.inject([]) { |memo,obj| memo + [OnStomp::Failover::Client.new([obj], ofc_options)] }
+        @read_conn = uri.map {|obj| OnStomp::Failover::Client.new([obj], ofc_options) }
       else
         @write_conn = OnStomp::Failover::Client.new([uri], ofc_options)
         @read_conn = [@write_conn]
