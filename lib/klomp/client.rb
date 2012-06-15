@@ -8,12 +8,14 @@ module Klomp
   class Client
     attr_reader :read_conn, :write_conn
 
-    def initialize(uri, options=nil)
-      options ||= {}
-      @translate_json, @auto_reply_to = true, true # defaults
-      @translate_json = options.delete(:translate_json) if options.has_key?(:translate_json)
-      @auto_reply_to  = options.delete(:auto_reply_to)  if options.has_key?(:auto_reply_to)
-      @logger         = options.delete(:logger)
+    def initialize(uri, options={})
+      @translate_json = options.fetch(:translate_json, true)
+      @auto_reply_to  = options.fetch(:auto_reply_to, true)
+      @logger         = options.fetch(:logger, nil)
+
+      # defaults for retry delay and attempts
+      options[:retry_delay]    ||= 2
+      options[:retry_attempts] ||= 10
 
       if uri.is_a?(Array)
         @write_conn = OnStomp::Failover::Client.new(uri, options)
