@@ -103,4 +103,9 @@ describe Klomp::Client do
     client.disconnect
   end
 
+  it 'sends all unknown options through to OnStomp' do
+    client = Klomp::Client.new(@uris.first, :haz_cheezburgers => true, :retry_attempts => 42).connect
+    assert client.write_conn.connected?
+    assert_equal 42, client.write_conn.retry_attempts
+  end
 end

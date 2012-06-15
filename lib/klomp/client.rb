@@ -6,25 +6,20 @@ require 'logger'
 module Klomp
 
   class Client
-    attr_reader :options, :read_conn, :write_conn
+    attr_reader :read_conn, :write_conn
 
-    def initialize(uri, options={})
-      @options = {
-        :translate_json => true,
-        :auto_reply_to  => true,
-        :logger         => false
-      }.merge(options || {})
-
-      ofc_options = @options.inject({
-        :retry_attempts => -1,
-        :retry_delay    => 1
-      }) { |memo,(k,v)| memo.has_key?(k) ? memo.merge({k => v}) : memo }
+    def initialize(uri, options=nil)
+      options ||= {}
+      @translate_json, @auto_reply_to = true, true # defaults
+      @translate_json = options.delete(:translate_json) if options.has_key?(:translate_json)
+      @auto_reply_to  = options.delete(:auto_reply_to)  if options.has_key?(:auto_reply_to)
+      @logger         = options.delete(:logger)
 
       if uri.is_a?(Array)
-        @write_conn = OnStomp::Failover::Client.new(uri, ofc_options)
-        @read_conn = uri.map {|obj| OnStomp::Failover::Client.new([obj], ofc_options) }
+        @write_conn = OnStomp::Failover::Client.new(uri, options)
+        @read_conn = uri.map {|obj| OnStomp::Failover::Client.new([obj], options) }
       else
-        @write_conn = OnStomp::Failover::Client.new([uri], ofc_options)
+        @write_conn = OnStomp::Failover::Client.new([uri], options)
         @read_conn = [@write_conn]
       end
       @all_conn = ([@write_conn] + @read_conn).uniq
@@ -32,7 +27,7 @@ module Klomp
     end
 
     def send(*args, &block)
-      if @options[:translate_json] && args[1].respond_to?(:to_json)
+      if @translate_json && args[1].respond_to?(:to_json)
         args[1] = args[1].to_json
         args[2] ||= {}
         args[2][:'content-type'] = 'application/json'
@@ -42,14 +37,15 @@ module Klomp
       log.info("[Sending] Destination=#{args[0]} Body=#{args[1]} Headers=#{args[2]}") if log
       @write_conn.send(*args, &block)
     end
-    alias :puts :send
+    alias puts send
+    alias publish send
 
     def subscribe(*args, &block)
       frames = []
       @read_conn.each do |c|
         frames << c.subscribe(*args) do |msg|
           log.info("[Received] Body=#{msg.body} Headers=#{msg.headers.to_hash.sort}") if log
-          if @options[:translate_json]
+          if @translate_json
             msg.body = begin
               JSON.parse(msg.body)
             rescue JSON::ParserError
@@ -57,7 +53,7 @@ module Klomp
             end
           end
           reply_args = yield msg
-          if @options[:auto_reply_to] && !msg.headers[:'reply-to'].nil?
+          if @auto_reply_to && !msg.headers[:'reply-to'].nil?
             if reply_args.is_a?(Array)
               send(msg.headers[:'reply-to'], *reply_args)
             else
@@ -70,7 +66,7 @@ module Klomp
     end
 
     def log
-      @options[:logger]
+      @logger
     end
 
     WRITE_ONLY_METHODS = [
