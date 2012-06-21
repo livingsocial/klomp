@@ -36,6 +36,14 @@ manages connections. For example, while the `connected?` method normally
 returns a boolean value, Klomp's `connected?` will return an array of booleans
 (i.e. one result for each broker).
 
+### Fibonacci back-off retry behavior
+
+The OnStomp failover client takes `:retry_attempts` and `:retry_delay` options,
+and Klomp supports these too. However, if you do not specify either of these
+values, Klomp's default behavior will be to try to reconnect indefinitely, but
+use a fibonacci backoff approach, i.e., it will wait `fib(N)` seconds before
+trying to reconnect on the Nth attempt.
+
 ### Additional options for Klomp::Client
 
 <table>

@@ -3,6 +3,11 @@ require 'onstomp/failover'
 require 'json'
 require 'logger'
 
+class OnStomp::Failover::Client
+  # Save previous N, N-1 delays for fibonacci backoff
+  attr_accessor :prev_retry_delay
+end
+
 module Klomp
 
   class Client
@@ -14,9 +19,11 @@ module Klomp
       @auto_reply_to  = options.fetch(:auto_reply_to, true)
       @logger         = options.fetch(:logger, nil)
 
+      @fib_retry_backoff = !options.has_key?(:retry_attempts) && !options.has_key?(:retry_delay)
+
       # defaults for retry delay and attempts
-      options[:retry_delay]    ||= 2
-      options[:retry_attempts] ||= 10
+      options[:retry_delay]    ||= 1
+      options[:retry_attempts] ||= -1
 
       if uri.is_a?(Array)
         @write_conn = OnStomp::Failover::Client.new(uri, options)
@@ -126,6 +133,16 @@ module Klomp
     def configure_connections
       klomp_client = self
       @all_conn.each do |c|
+        if @fib_retry_backoff
+          c.before_failover_retry do |conn, attempt|
+            if attempt == 1
+              conn.prev_retry_delay, conn.retry_delay = 0, 1
+            else
+              conn.prev_retry_delay, conn.retry_delay = conn.retry_delay, conn.prev_retry_delay + conn.retry_delay
+            end
+          end
+        end
+
         c.on_failover_connect_failure do
           klomp_client.last_connect_exception = $!
         end

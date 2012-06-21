@@ -115,4 +115,41 @@ describe Klomp::Client do
     assert client.write_conn.connected?
     assert_equal 42, client.write_conn.retry_attempts
   end
+
+  it 'uses a fibonacci back-off approach to reconnect' do
+    good_client = Object.new
+    def good_client.connect; true; end
+    def good_client.connected?; true; end
+    def good_client.connection; true; end
+
+    bad_client = Object.new
+    def bad_client.connect; raise "could not connect"; end
+    def bad_client.connected?; false; end
+
+    test_context = self
+    attempts = 0
+    conn = nil
+    fib = lambda {|n| (1..n).inject([0, 1]) {|fib,_| [fib[1], fib[0]+fib[1]]}.first}
+
+    pool_class = Class.new do
+      def initialize(*) end
+      def each(&blk) end
+      define_method :next_client do
+        attempts += 1
+        test_context.assert_equal fib[attempts], conn.retry_delay
+        if attempts == 6
+          good_client
+        else
+          bad_client
+        end
+      end
+    end
+
+    client = Klomp::Client.new(@uris.first, :pool => pool_class)
+    conn = client.write_conn
+    def conn.sleep_for_retry(*) end # skip sleep between retries for test
+
+    client.reconnect
+    assert_equal 6, attempts
+  end
 end
