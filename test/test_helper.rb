@@ -6,3 +6,9 @@ trap("QUIT") do
     $stderr.puts
   end
 end
+
+module KlompTestHelpers
+  def let_background_processor_run
+    sleep 1
+  end
+end

@@ -6,6 +6,8 @@ require File.expand_path('../test_helper', __FILE__)
 
 describe Klomp::Client do
 
+  include KlompTestHelpers
+
   before do
     @uris = [
       'stomp://admin:password@localhost:61613',
@@ -72,7 +74,7 @@ describe Klomp::Client do
       got_message = true if msg.body == body
       client.ack(msg)
     end
-    sleep 1
+    let_background_processor_run
     assert got_message
 
     client.disconnect
@@ -89,7 +91,7 @@ describe Klomp::Client do
       got_message = true if msg.body == reply_to_body
       reply_to_body
     end
-    sleep 1
+    let_background_processor_run
     assert got_message
 
     client.disconnect
@@ -99,7 +101,11 @@ describe Klomp::Client do
     client = Klomp::Client.new(@uris).connect
 
     subscribe_frames = client.subscribe(@destination) { |msg| }
-    client.unsubscribe(subscribe_frames)
+    unsub_frames = client.unsubscribe(subscribe_frames)
+    assert_equal subscribe_frames.length, unsub_frames.length
+    let_background_processor_run
+
+    assert client.subscriptions.flatten.empty?, "expected connection to have no subscriptions"
 
     client.disconnect
   end

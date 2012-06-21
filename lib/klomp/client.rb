@@ -84,6 +84,18 @@ module Klomp
       frames
     end
 
+    def unsubscribe(frames, headers={})
+      if !frames.respond_to?(:length) || frames.length != @read_conn.length
+        raise ArgumentError,
+          "frames is not an array or its length does not match number of connections"
+      end
+      frames.each_with_index.map {|f,i| @read_conn[i].unsubscribe f, headers }
+    end
+
+    def subscriptions
+      @read_conn.map {|c| c.active_client.subscriptions }
+    end
+
     def log
       @logger
     end
