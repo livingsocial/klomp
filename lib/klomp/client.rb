@@ -109,13 +109,12 @@ module Klomp
     READ_ONLY_METHODS = [
       :ack,
       :nack,
-      :unsubscribe,
     ]
 
     def method_missing(method, *args, &block)
       case method
       when *WRITE_ONLY_METHODS
-        @write_conn.send(method, *args, &block)
+        @write_conn.__send__(method, *args, &block)
       when *READ_ONLY_METHODS
         @read_conn.map {|c| c.__send__(method, *args, &block) }
       else
