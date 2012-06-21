@@ -1,5 +1,7 @@
 source "http://rubygems.org"
+
 gem "onstomp"
+# gem 'onstomp', :path => '../onstomp'
 gem "json"
 
 group :development do

@@ -2,6 +2,7 @@ require 'minitest/autorun'
 require 'minitest/pride'
 
 require 'klomp'
+require File.expand_path('../test_helper', __FILE__)
 
 describe Klomp::Client do
 

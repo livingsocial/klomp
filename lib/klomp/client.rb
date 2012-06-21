@@ -7,6 +7,7 @@ module Klomp
 
   class Client
     attr_reader :read_conn, :write_conn
+    attr_accessor :last_connect_exception
 
     def initialize(uri, options={})
       @translate_json = options.fetch(:translate_json, true)
@@ -28,6 +29,23 @@ module Klomp
       configure_connections
     end
 
+    def connect
+      @all_conn.each do |conn|
+        begin
+          attempts = conn.retry_attempts
+          conn.retry_attempts = 1
+          conn.connect
+        rescue OnStomp::Failover::MaximumRetriesExceededError
+          location = conn.active_client.uri.dup.tap {|u| u.password = 'REDACTED' }.to_s
+          msg = ": #{last_connect_exception.message}" if last_connect_exception
+          raise OnStomp::ConnectFailedError, "initial connection failed for #{location}#{msg}"
+        ensure
+          conn.retry_attempts = attempts
+        end
+      end
+      self
+    end
+
     def send(*args, &block)
       if @translate_json && args[1].respond_to?(:to_json)
         args[1] = args[1].to_json
@@ -39,7 +57,6 @@ module Klomp
       log.info("[Sending] Destination=#{args[0]} Body=#{args[1]} Headers=#{args[2]}") if log
       @write_conn.send(*args, &block)
     end
-    alias puts send
     alias publish send
 
     def subscribe(*args, &block)
@@ -89,9 +106,6 @@ module Klomp
         @write_conn.send(method, *args, &block)
       when *READ_ONLY_METHODS
         @read_conn.map {|c| c.__send__(method, *args, &block) }
-      when :connect
-        @all_conn.each {|c| c.connect}
-        self
       else
         @all_conn.map {|c| c.__send__(method, *args) }
       end
@@ -99,9 +113,10 @@ module Klomp
 
     private
     def configure_connections
+      klomp_client = self
       @all_conn.each do |c|
         c.on_failover_connect_failure do
-          raise if OnStomp::FatalConnectionError === $!
+          klomp_client.last_connect_exception = $!
         end
       end
     end
