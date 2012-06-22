@@ -102,9 +102,7 @@ failover.
 
 ## Change Log
 
-### 0.0.1
-
-* Initial release
+See the [ChangeLog file](/livingsocial/klomp/blob/master/ChangeLog.md).
 
 ## License
 
