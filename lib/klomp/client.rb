@@ -1,6 +1,7 @@
 require 'onstomp'
 require 'onstomp/failover'
 require 'json'
+require 'uuid'
 require 'logger'
 
 class OnStomp::Failover::Client
@@ -18,6 +19,7 @@ module Klomp
       @translate_json = options.fetch(:translate_json, true)
       @auto_reply_to  = options.fetch(:auto_reply_to, true)
       @logger         = options.fetch(:logger, nil)
+      @uuid           = options.fetch(:uuid) { UUID.new }
 
       @fib_retry_backoff = !options.has_key?(:retry_attempts) && !options.has_key?(:retry_delay)
 
@@ -53,16 +55,16 @@ module Klomp
       self
     end
 
-    def send(*args, &block)
-      if @translate_json && args[1].respond_to?(:to_json)
-        args[1] = args[1].to_json
-        args[2] ||= {}
-        args[2][:'content-type'] = 'application/json'
+    def send(dest, body, headers={}, &cb)
+      if @translate_json && body.respond_to?(:to_json)
+        body = body.to_json
+        headers[:'content-type'] = 'application/json'
       else
-        args[1] = args[1].to_s
+        body = body.to_s
       end
-      log.info("[Sending] Destination=#{args[0]} Body=#{args[1]} Headers=#{args[2]}") if log
-      @write_conn.send(*args, &block)
+      uuid = headers[:id] = @uuid.generate if @uuid
+      log.info("[Sending] ID=#{uuid} Destination=#{dest} Body=#{body.inspect} Headers=#{headers.inspect}") if log
+      @write_conn.send(dest, body, headers, &cb)
     end
     alias publish send
 
@@ -70,7 +72,7 @@ module Klomp
       frames = []
       @read_conn.each do |c|
         frames << c.subscribe(*args) do |msg|
-          log.info("[Received] Body=#{msg.body} Headers=#{msg.headers.to_hash.sort}") if log
+          log.info("[Received] ID=#{msg[:id]} Body=#{msg.body.inspect} Headers=#{msg.headers.to_hash.inspect}") if log
           if @translate_json
             msg.body = begin
               JSON.parse(msg.body)

@@ -52,15 +52,14 @@ describe Klomp::Client do
 
   it 'has a logger' do
     logger = Logger.new(STDOUT)
-    client = Klomp::Client.new(@uris, :logger=>logger).connect
-
+    client = Klomp::Client.new(@uris, :logger=>logger)
     assert_equal client.log, logger
-
-    client.disconnect
   end
 
   it 'sends heartbeat' do
-    client = Klomp::Client.new(@uris).connect.beat
+    client = Klomp::Client.new(@uris).connect
+    client.beat
+    client.disconnect
   end
 
   it 'sends requests and gets responses' do
@@ -84,7 +83,7 @@ describe Klomp::Client do
     client        = Klomp::Client.new(@uris).connect
     reply_to_body = { 'reply_to_body' => rand(36**128).to_s(36) }
 
-    client.puts(@destination, nil, { 'reply-to' => @destination })
+    client.send(@destination, nil, { 'reply-to' => @destination })
 
     got_message = false
     client.subscribe(@destination) do |msg|
@@ -114,6 +113,7 @@ describe Klomp::Client do
     client = Klomp::Client.new(@uris.first, :haz_cheezburgers => true, :retry_attempts => 42).connect
     assert client.write_conn.connected?
     assert_equal 42, client.write_conn.retry_attempts
+    client.disconnect
   end
 
   it 'uses a fibonacci back-off approach to reconnect' do
@@ -151,5 +151,82 @@ describe Klomp::Client do
 
     client.reconnect
     assert_equal 6, attempts
+  end
+
+  it 'sends messages with uuids in the :id header' do
+    client = Klomp::Client.new(@uris, :translate_json => false).connect
+    client.send(@destination, '')
+
+    received_message = false
+    client.subscribe(@destination) do |msg|
+      received_message = msg
+    end
+    let_background_processor_run
+    assert received_message
+    assert received_message[:id], "message did not have an id"
+    assert received_message[:id] =~ /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      "message id did not look like a uuid"
+
+    client.disconnect
+  end
+
+  it 'allows customization of the uuid generator' do
+    generator = Object.new
+    def generator.generate; "42"; end
+
+    client = Klomp::Client.new(@uris, :translate_json => false, :uuid => generator).connect
+    client.send(@destination, '')
+
+    received_message = false
+    client.subscribe(@destination) do |msg|
+      received_message = msg
+    end
+    let_background_processor_run
+    assert received_message
+    assert received_message[:id], "message did not have an id"
+    assert_equal "42", received_message[:id]
+
+    client.disconnect
+  end
+
+  it 'allows disabling generated message ids' do
+    client = Klomp::Client.new(@uris, :translate_json => false, :uuid => false).connect
+    client.send(@destination, '')
+
+    received_message = false
+    client.subscribe(@destination) do |msg|
+      received_message = msg
+    end
+    let_background_processor_run
+    assert received_message
+    refute received_message[:id], "message had an id"
+
+    client.disconnect
+  end
+
+  it 'logs message ids' do
+    logger = Object.new
+    def logger.msgs; @msgs; end
+    def logger.info(msg) (@msgs ||= []) << msg end
+
+    client = Klomp::Client.new(@uris, :translate_json => false, :logger => logger).connect
+    client.send(@destination, '')
+
+    received_message = false
+    client.subscribe(@destination) do |msg|
+      received_message = msg
+    end
+    let_background_processor_run
+    assert received_message
+    assert received_message[:id], "message did not have an id"
+
+    assert_equal 2, logger.msgs.length
+    assert logger.msgs[0] =~ /\[Sending\] ID=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/
+    sent_id = $1
+    assert logger.msgs[1] =~ /\[Received\] ID=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/
+    received_id = $1
+    assert_equal sent_id, received_id
+
+    client.disconnect
   end
 end

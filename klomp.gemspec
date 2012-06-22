@@ -17,4 +17,5 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency("onstomp", "~> 1.0.7")
   gem.add_dependency("json")
+  gem.add_dependency("uuid", "~> 2.3.5")
 end

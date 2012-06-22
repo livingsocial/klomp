@@ -44,6 +44,13 @@ values, Klomp's default behavior will be to try to reconnect indefinitely, but
 use a fibonacci backoff approach, i.e., it will wait `fib(N)` seconds before
 trying to reconnect on the Nth attempt.
 
+### Message IDs
+
+Klomp uses the `uuid` gem to generate per-message unique identifiers. To disable
+generated message IDs, pass `:uuid => false` in the options hash. To customize
+to use your own generator, simply pass `:uuid => object` where the object you
+pass implements a `#generate` method that returns a string ID.
+
 ### Additional options for Klomp::Client
 
 <table>
@@ -66,6 +73,11 @@ trying to reconnect on the Nth attempt.
     <td>:logger</td>
     <td>false</td>
     <td>Logger object</td>
+  </tr>
+  <tr>
+  <td>:uuid</td>
+  <td>UUID.new</td>
+  <td>UUID generator object, responds to :generate and returns an ID</td>
   </tr>
 </table>
 
