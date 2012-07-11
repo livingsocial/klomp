@@ -1,16 +1,16 @@
 # Klomp
 
-Klomp is a simple wrapper around the [OnStomp](https://github.com/meadvillerb/onstomp/)
-library with some additional HA and usability features:
+Klomp is a simple wrapper around the [Stomp](https://github.com/stompgem/stomp)
+and [OnStomp](https://github.com/meadvillerb/onstomp/) libraries with some
+additional HA and usability features:
 
 * When initialized with multiple broker URIs, Klomp will publish messages to
 one broker at a time, but will consume from all brokers simultaneously. This is
-a slight improvement over the regular [OnStomp::Failover::Client](http://mdvlrb.com/onstomp/OnStomp/Failover/Client.html)
-which handles all publishing and subscribing through a single "active" broker.
-This traditional one-broker-at-a-time technique can lead to a split-brain
-scenario in which messages are only received by a subset of your STOMP clients.
-By consuming from all brokers simultaneously, Klomp ensures that no message is
-left behind.
+a slight improvement over traditional failover clients that work by publishing
+and subscribing through a single "active" broker. This one-broker-at-a-time
+technique can lead to a split-brain scenario in which messages are only
+received by a subset of your STOMP clients. By consuming from all brokers
+simultaneously, Klomp ensures that no message is left behind.
 
 * Where applicable, message bodies are automatically translated between native
 Ruby and JSON objects.
@@ -26,14 +26,13 @@ subscribe block.
 ## Example usage
 
 The goal is that you should be able to use most (if not all) of the standard
-OnStomp API (see [OnStomp's UserNarrative](https://github.com/meadvillerb/onstomp/blob/master/extra_doc/UserNarrative.md))
-via a `Klomp::Client`:
+Stomp/OnStomp APIs via a `Klomp::Client`:
 
     client = Klomp::Client.new([ ... ])
 
 However, there will be some differences in the API due to how `Klomp::Client`
-manages connections. For example, while the `connected?` method normally
-returns a boolean value, Klomp's `connected?` will return an array of booleans
+manages connections. For example, while OnStomp's `connected?` method normally
+returns a single boolean value, Klomp's `connected?` will return many booleans
 (i.e. one result for each broker).
 
 ### Fibonacci back-off retry behavior
@@ -75,9 +74,9 @@ pass implements a `#generate` method that returns a string ID.
     <td>Logger object</td>
   </tr>
   <tr>
-  <td>:uuid</td>
-  <td>UUID.new</td>
-  <td>UUID generator object, responds to :generate and returns an ID</td>
+    <td>:uuid</td>
+    <td>UUID.new</td>
+    <td>UUID generator object, responds to :generate and returns an ID</td>
   </tr>
 </table>
 

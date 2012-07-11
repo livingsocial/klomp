@@ -10,12 +10,12 @@ task :test_failover do
   client = Klomp::Client.new([
     'stomp://admin:password@localhost:61613',
     'stomp://admin:password@127.0.0.1:62613'
-  ]).connect
+  ], :adapter => :onstomp).connect
 
   last_i = nil
   client.subscribe("/queue/test") do |msg|
     print "-"
-    last_i = msg.body.to_i
+    last_i = msg.body.gsub('"', '').to_i
   end
 
   begin
