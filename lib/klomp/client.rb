@@ -1,6 +1,5 @@
 require 'onstomp'
 require 'onstomp/failover'
-require 'stomp'
 require 'json'
 require 'uuid'
 require 'logger'
@@ -66,6 +65,8 @@ module Klomp
           @read_conn = [@write_conn]
         end
       when :stomp
+        require 'stomp'
+
         # Failover in the Stomp library is kind of flaky. If the client
         # temporarily loses its connection, it is eventually able to reconnect
         # and resume sending messages. However, the subscribe thread never
