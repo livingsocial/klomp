@@ -139,7 +139,7 @@ describe Klomp::Client do
     it "(#{adapter}) logs message ids" do
       logger = Object.new
       def logger.msgs; @msgs; end
-      def logger.info(msg) (@msgs ||= []) << msg end
+      def logger.debug(msg) (@msgs ||= []) << msg end
 
       client = Klomp::Client.new(@uris, :adapter => adapter, :translate_json => false, :logger => logger).connect
       client.send(@destination, '')
