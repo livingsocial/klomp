@@ -60,11 +60,6 @@ pass implements a `#generate` method that returns a string ID.
     <th>Description</th>
   </tr>
   <tr>
-    <td>:adapter</td>
-    <td>:onstomp</td>
-    <td>Stomp library to use. Currently, only :stomp and :onstomp are supported.</td>
-  </tr>
-  <tr>
     <td>:translate_json</td>
     <td>true</td>
     <td>Translate message bodies between native Ruby and JSON objects?</td>
