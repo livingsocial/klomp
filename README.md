@@ -75,9 +75,14 @@ pass implements a `#generate` method that returns a string ID.
     <td>Logger object</td>
   </tr>
   <tr>
-  <td>:uuid</td>
-  <td>UUID.new</td>
-  <td>UUID generator object, responds to :generate and returns an ID</td>
+    <td>:uuid</td>
+    <td>UUID.new</td>
+    <td>UUID generator object, responds to :generate and returns an ID</td>
+  </tr>
+  <tr>
+    <td>:vhost</td>
+    <td>nil</td>
+    <td>override Apollo virtual host</td>
   </tr>
 </table>
 

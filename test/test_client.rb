@@ -37,6 +37,19 @@ describe Klomp::Client do
     client.disconnect
   end
 
+  it 'allows the virtual host to be set' do
+    vhost = "klomp-test"
+
+    client = Klomp::Client.new(@uris, :vhost => vhost)
+    assert_equal vhost, client.vhost
+
+    client.all_conn.each do |failover_client|
+      failover_client.client_pool.each do |conn|
+        assert_equal vhost, conn.host
+      end
+    end
+  end
+
   it 'raises an error if authentication fails' do
     assert_raises OnStomp::ConnectFailedError do
       Klomp::Client.new(@uris.first.sub('password', 'psswrd')).connect

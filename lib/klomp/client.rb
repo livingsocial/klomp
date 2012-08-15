@@ -12,7 +12,7 @@ end
 module Klomp
 
   class Client
-    attr_reader :read_conn, :write_conn
+    attr_reader :read_conn, :write_conn, :all_conn, :vhost
     attr_accessor :last_connect_exception
 
     def initialize(uri, options={})
@@ -20,6 +20,7 @@ module Klomp
       @auto_reply_to  = options.fetch(:auto_reply_to, true)
       @logger         = options.fetch(:logger, nil)
       @uuid           = options.fetch(:uuid) { UUID.new }
+      @vhost          = options.fetch(:vhost, nil)
 
       @fib_retry_backoff = !options.has_key?(:retry_attempts) && !options.has_key?(:retry_delay)
 
@@ -135,6 +136,13 @@ module Klomp
     def configure_connections
       klomp_client = self
       @all_conn.each do |c|
+
+        if @vhost
+          c.client_pool.each do |client|
+            client.host = @vhost
+          end
+        end
+
         if @fib_retry_backoff
           c.before_failover_retry do |conn, attempt|
             if attempt == 1
