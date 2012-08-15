@@ -62,8 +62,7 @@ module Klomp
       else
         body = body.to_s
       end
-
-      uuid = headers['id'] = @uuid.generate if @uuid
+      uuid = headers[:id] = @uuid.generate if @uuid
       log.debug("[Sending] ID=#{uuid} Destination=#{dest} Body=#{body.inspect} Headers=#{headers.inspect}") if log
       @write_conn.send(dest, body, headers, &cb)
     end
@@ -73,7 +72,7 @@ module Klomp
       frames = []
       @read_conn.each do |c|
         frames << c.subscribe(*args) do |msg|
-          log.debug("[Received] ID=#{msg.headers['id']} Body=#{msg.body.inspect} Headers=#{msg.headers.to_hash.inspect}") if log
+          log.debug("[Received] ID=#{msg[:id]} Body=#{msg.body.inspect} Headers=#{msg.headers.to_hash.inspect}") if log
           if @translate_json
             msg.body = begin
               JSON.parse(msg.body)
