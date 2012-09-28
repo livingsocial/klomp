@@ -1,0 +1,13 @@
+.rspec
+.rvmrc
+CHANGELOG.md
+Gemfile
+Gemfile.lock
+Manifest.txt
+README.md
+Rakefile
+lib/loldance.rb
+loldance.gemspec
+spec/#loldance_spec.rb#
+spec/spec_helper.rb
+spec/support/have_received.rb
