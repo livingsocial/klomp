@@ -11,11 +11,11 @@ class Loldance
     @subscriptions = {}
   end
 
-  def publish(queue, body)
+  def publish(queue, body, headers = {})
     connections_remaining = connections.dup
     begin
       conn = connections_remaining.sample
-      conn.publish(queue, body)
+      conn.publish(queue, body, headers)
     rescue
       connections_remaining.delete conn
       retry unless connections_remaining.empty?

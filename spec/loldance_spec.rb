@@ -57,7 +57,7 @@ describe Loldance do
       Then { connections.values.select {|conn| conn.connected? }.length.should == 1 }
 
       Then { connections.values.detect {|conn| conn.connected? }.
-        should have_received(:publish).with("/queue/greeting", "hello") }
+        should have_received(:publish).with("/queue/greeting", "hello", {}) }
 
     end
 
@@ -83,7 +83,7 @@ describe Loldance do
       Then { connections.values.select {|conn| conn.connected? }.length.should == 1 }
 
       Then { connections.values.detect {|conn| conn.connected? }.
-        should have_received(:publish).with("/queue/greeting", "hello") }
+        should have_received(:publish).with("/queue/greeting", "hello", {}) }
 
     end
 
