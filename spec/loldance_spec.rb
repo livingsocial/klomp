@@ -191,4 +191,26 @@ describe Loldance do
 
   end
 
+  context "subscriptions" do
+
+    context "is not empty after subscribing" do
+
+      Given { connections.values.each {|conn| conn.stub!(subscribe: true, unsubscribe: true) } }
+
+      When { loldance.subscribe("/queue/greeting") { true } }
+
+      Then { loldance.subscriptions.length.should == 1 }
+
+      context "and empty after unsubscribing" do
+
+        When { loldance.unsubscribe("/queue/greeting") }
+
+        Then { loldance.subscriptions.length.should == 0 }
+
+      end
+
+    end
+
+  end
+
 end
