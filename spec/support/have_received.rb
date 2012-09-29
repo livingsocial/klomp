@@ -11,7 +11,8 @@ class RSpec::Mocks::Proxy
   # This does the equivalent of rspec-spies monkey patch, but with less work
   alias orig_message_received message_received
   def message_received(*args, &block)
-    orig_message_received(*args, &block).tap { record_message_received(*args, &block) }
+    record_message_received(*args, &block)
+    orig_message_received(*args, &block)
   end
 
   # Be sure to reset the messages received between specs!
