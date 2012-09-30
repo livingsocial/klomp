@@ -37,3 +37,4 @@ class Loldance
 end
 
 require 'loldance/connection'
+require 'loldance/frames'
