@@ -9,14 +9,19 @@ class Loldance
     def initialize(server, options={})
       host, port = server.split ':'
       @options = options
+      @options['server'] = [host, port.to_i]
       @options['host'] ||= host
-      @socket  = TCPSocket.new host, port.to_i
-      @socket.set_encoding 'UTF-8'
       connect
+    end
+
+    def publish(queue, body, headers={})
+      write Frames::Send.new(queue, body, headers)
     end
 
     private
     def connect
+      @socket  = TCPSocket.new *options['server']
+      @socket.set_encoding 'UTF-8'
       write Frames::Connect.new(options)
       read Frames::Connected, 0.1
     end

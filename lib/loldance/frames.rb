@@ -72,5 +72,15 @@ class Loldance
 
     class Connected < ServerFrame
     end
+
+    class Send < Frame
+      def initialize(queue, body, hdrs)
+        headers['destination'] = queue
+        headers.update(hdrs.reject{|k,v| %w(destination content-length).include? k })
+        headers['content-type'] ||= 'text/plain'
+        headers['content-length'] = body.bytesize.to_s
+        @body = body
+      end
+    end
   end
 end
