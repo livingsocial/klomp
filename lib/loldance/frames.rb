@@ -65,8 +65,9 @@ class Loldance
       def initialize(options)
         headers['accept-version'] = '1.1'
         headers['host'] = options['host'] if options['host']
+        headers['heart-beat'] = "0,0"
         headers['login'] = options['login'] if options['login']
-        headers['password'] = options['password'] if options['password']
+        headers['passcode'] = options['passcode'] if options['passcode']
       end
     end
 

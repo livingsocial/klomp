@@ -4,7 +4,7 @@ describe Loldance::Frames do
 
   context "CONNECT" do
 
-    Given(:options) { {'login' => 'admin', 'password' => 'password', 'host' => '127.0.0.1'} }
+    Given(:options) { {'login' => 'admin', 'passcode' => 'password', 'host' => '127.0.0.1'} }
 
     When(:connect) { Loldance::Frames::Connect.new(options).to_s }
 

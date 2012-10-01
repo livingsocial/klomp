@@ -5,7 +5,7 @@ describe Loldance::Connection do
   Given(:data) { frame(:connected) }
   Given(:socket) { double(TCPSocket, gets:data, write:nil, set_encoding:nil) }
   Given(:server) { "127.0.0.1:61613" }
-  Given(:options) { { "login" => "admin", "password" => "password" } }
+  Given(:options) { { "login" => "admin", "passcode" => "password" } }
 
   Given { IO.stub!(:select).and_return([[socket], [socket]])
     TCPSocket.stub!(:new).and_return socket }
