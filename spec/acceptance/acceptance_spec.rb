@@ -23,14 +23,15 @@ describe "Loldance acceptance", :acceptance => true do
     When { loldance.publish "/queue/greeting", "hello" }
 
     Then do
-      vhosts = apollo_api_get("/broker/virtual-hosts.json")
-      @vhost = vhosts['rows'].detect {|row| row['queues'].include?('greeting') }['id']
-      queue = apollo_api_get("/broker/virtual-hosts/#{@vhost}/queues/greeting.json")
+      vhosts = apollo_api_get_json "/broker/virtual-hosts.json"
+      vhost = vhosts['rows'].detect {|row| row['queues'].include?('greeting') }['id']
+      @queue_path = "/broker/virtual-hosts/#{vhost}/queues/greeting.json"
+      queue = apollo_api_get_json @queue_path
       queue['metrics']['queue_items'].to_i.should > 0
     end
 
     after do
-      `curl -s -X DELETE -u #{credentials.join(':')} http://localhost:61680/broker/virtual-hosts/#{@vhost}/queues/greeting.json`
+      apollo_api_delete @queue_path
     end
   end
 
@@ -54,8 +55,16 @@ describe "Loldance acceptance", :acceptance => true do
 
   after { clients.each(&:disconnect) }
 
-  def apollo_api_get(path)
-    open("http://localhost:61680#{path}",
-         :http_basic_authentication => credentials) {|f| JSON::parse(f.read) }
+  def apollo_mgmt_url(path)
+    "http://localhost:61680#{path}"
+  end
+
+  def apollo_api_get_json(path)
+    open(apollo_mgmt_url(path), :http_basic_authentication => credentials) {|f| JSON::parse(f.read) }
+  end
+
+  def apollo_api_delete(path)
+    `curl -s -f -X DELETE -u #{credentials.join(':').inspect} #{apollo_mgmt_url path}`
+    $?.should be_success
   end
 end
