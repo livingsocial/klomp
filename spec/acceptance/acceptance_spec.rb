@@ -34,6 +34,24 @@ describe "Loldance acceptance", :acceptance => true do
     end
   end
 
+  context "subscribe" do
+
+    Given(:subscriber) { double("subscriber") }
+    Given { loldance.publish "/queue/greeting", "hello subscriber!" }
+
+    When do
+      subscriber.stub!(:call).and_return {|msg| subscriber.stub!(:message => msg) }
+      loldance.subscribe "/queue/greeting", subscriber
+    end
+
+    Then do
+      sleep 1
+      subscriber.should have_received(:call).with(an_instance_of(Loldance::Frames::Message))
+      subscriber.message.body.should == "hello subscriber!"
+    end
+
+  end
+
   after { clients.each(&:disconnect) }
 
   def apollo_api_get(path)

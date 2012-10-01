@@ -65,6 +65,8 @@ class Loldance
       type.new @socket.gets(FRAME_SEP)
     end
 
+    DISCONNECT = Class.new(StandardError)
+
     def start_subscriber_thread
       @subscriber_thread ||= Thread.new do
         loop do
@@ -73,7 +75,10 @@ class Loldance
             if subscriber = subscriptions[message.headers['destination']]
               subscriber.call message
             end
-          rescue
+          rescue DISCONNECT
+            break
+          rescue => e
+            $stderr.puts e.to_s, *e.backtrace
             # don't die if an exception occurs, just check if we've been closed
             # TODO: log exception
           end
@@ -83,7 +88,7 @@ class Loldance
     end
 
     def stop_subscriber_thread
-      @subscriber_thread.raise "disconnect" if @subscriber_thread
+      @subscriber_thread.raise DISCONNECT, "disconnect" if @subscriber_thread
       @subscriber_thread = nil
     end
   end

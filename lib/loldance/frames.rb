@@ -45,6 +45,7 @@ class Loldance
         frame = nil
         {}.tap do |headers|
           data.lines.each do |line|
+            next if line == "\n"
             unless frame
               frame = line.chomp
               @error = frame == "ERROR"
