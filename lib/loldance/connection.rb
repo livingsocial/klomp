@@ -39,6 +39,10 @@ class Loldance
       @socket && !@closed
     end
 
+    def closed?
+      @closed && @socket.nil?
+    end
+
     def disconnect
       @closed = true
       stop_subscriber_thread
@@ -57,6 +61,7 @@ class Loldance
     end
 
     def write(frame)
+      raise Error, "connection closed" if closed?
       rs, ws, = IO.select(nil, [@socket], nil, 0.1)
       raise Error, "connection unavailable for write" unless ws && !ws.empty?
       @socket.write frame.to_s

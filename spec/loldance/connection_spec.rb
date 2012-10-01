@@ -174,6 +174,12 @@ describe Loldance::Connection do
       socket.should have_received(:close)
     end
 
+    context "makes connection useless (raises error)" do
+
+      Then { expect { connection.publish "/queue/greeting", "hello" }.to raise_error(Loldance::Error) }
+
+    end
+
   end
 
 end
