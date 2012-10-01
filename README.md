@@ -17,7 +17,7 @@ transactions, no complicated messaging patterns.
 ## FEATURES:
 
 ```
-dance = Loldance.new(["127.0.0.1:61613"])
+dance = Loldance.new(["127.0.0.1:61613"], "login" => "mylogin", "passcode" => "mypassword")
 
 dance.publish("/queue/loldance", "craziness")
 
