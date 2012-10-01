@@ -22,14 +22,15 @@ class Loldance
     def subscribe(queue, subscriber = nil, &block)
       raise Loldance::Error, "no subscriber provided" unless subscriber || block
       raise Loldance::Error, "subscriber does not respond to #call" if subscriber && !subscriber.respond_to?(:call)
+      previous = subscriptions[queue]
       subscriptions[queue] = subscriber || block
-      write Frames::Subscribe.new(queue)
+      write Frames::Subscribe.new(queue) unless previous
       start_subscriber_thread
+      previous
     end
 
     def unsubscribe(queue)
-      subscriptions.delete queue
-      write Frames::Unsubscribe.new(queue)
+      write Frames::Unsubscribe.new(queue) if subscriptions.delete queue
     end
 
     def connected?

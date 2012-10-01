@@ -57,6 +57,17 @@ describe Loldance::Connection do
 
     end
 
+    context "called twice writes to the socket only once" do
+
+      When do
+        connection.subscribe "/queue/greeting", subscriber
+        connection.subscribe "/queue/greeting", double("another subscriber that replaces the first", call:nil)
+      end
+
+      Then { socket.should have_received(:write).with(frame(:subscribe)).once }
+
+    end
+
     context "and accepts a block as the subscriber" do
 
       When { connection.subscribe("/queue/foo") { true } }
