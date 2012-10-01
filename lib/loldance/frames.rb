@@ -73,6 +73,9 @@ class Loldance
     class Connected < ServerFrame
     end
 
+    class Message < ServerFrame
+    end
+
     class Send < Frame
       def initialize(queue, body, hdrs)
         headers['destination'] = queue
@@ -80,6 +83,20 @@ class Loldance
         headers['content-type'] ||= 'text/plain'
         headers['content-length'] = body.bytesize.to_s
         @body = body
+      end
+    end
+
+    class Subscribe < Frame
+      def initialize(queue)
+        headers['id'] = queue
+        headers['destination'] = queue
+        headers['ack'] = 'auto'
+      end
+    end
+
+    class Unsubscribe < Frame
+      def initialize(queue)
+        headers['id'] = queue
       end
     end
   end

@@ -124,47 +124,6 @@ describe Loldance do
 
     end
 
-    context "fails if neither a subscriber nor a block is given" do
-
-      When(:expect_publish) { expect { loldance.subscribe("/queue/greeting") } }
-
-      Then { expect_publish.to raise_error(Loldance::Error) }
-
-    end
-
-    context "fails if the subscriber does not respond to #call" do
-
-      When(:expect_publish) { expect { loldance.subscribe("/queue/greeting", double("subscriber")) } }
-
-      Then { expect_publish.to raise_error(Loldance::Error) }
-
-    end
-
-    context "accepts a block as the subscriber" do
-
-      Given { connections.values.each {|conn| conn.stub!(:subscribe).
-          and_return {|queue,&block| conn.stub!(:subscriber => block) } } }
-
-      When { loldance.subscribe("/queue/greeting") { true } }
-
-      Then { connections.values.each {|conn| conn.should have_received(:subscribe).with("/queue/greeting", nil) } }
-
-      Then { connections.values.each {|conn| conn.subscriber.call.should == true } }
-
-    end
-
-    context "accepts an object that responds to #call as the subscriber" do
-
-      Given(:object) { double("object", call:true) }
-
-      Given { connections.values.each {|conn| conn.stub!(:subscribe) } }
-
-      When { loldance.subscribe("/queue/greeting", object) }
-
-      Then { connections.values.each {|conn| conn.should have_received(:subscribe).with("/queue/greeting", object) } }
-
-    end
-
   end
 
   context "unsubscribe" do
@@ -186,28 +145,6 @@ describe Loldance do
       When { loldance.unsubscribe("/queue/greeting") }
 
       Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting") } }
-
-    end
-
-  end
-
-  context "subscriptions" do
-
-    context "is not empty after subscribing" do
-
-      Given { connections.values.each {|conn| conn.stub!(subscribe: true, unsubscribe: true) } }
-
-      When { loldance.subscribe("/queue/greeting") { true } }
-
-      Then { loldance.subscriptions.length.should == 1 }
-
-      context "and empty after unsubscribing" do
-
-        When { loldance.unsubscribe("/queue/greeting") }
-
-        Then { loldance.subscriptions.length.should == 0 }
-
-      end
 
     end
 
