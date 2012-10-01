@@ -40,7 +40,6 @@ class Loldance
       @closed = true
       stop_subscriber_thread
       write Frames::Disconnect.new
-      read Frames::Receipt
       @socket.close rescue nil
       @socket = nil
     end

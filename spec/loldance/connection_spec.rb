@@ -143,13 +143,12 @@ describe Loldance::Connection do
     Given!(:connection) { Loldance::Connection.new server, options }
 
     When do
-      socket.stub!(:gets => frame(:receipt), :close => nil)
+      socket.stub!(:close => nil)
       connection.disconnect
     end
 
     Then do
       socket.should have_received(:write).with(frame(:disconnect))
-      socket.should have_received(:gets).with("\x00").ordered
       socket.should have_received(:close)
     end
 
