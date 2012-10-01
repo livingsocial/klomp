@@ -32,11 +32,17 @@ class Loldance
       write Frames::Unsubscribe.new(queue)
     end
 
+    def disconnect
+      @closed = true
+      write Frames::Disconnect.new
+      read Frames::Receipt
+    end
+
     private
     def start_subscriber_thread
       @subscriber_thread ||= Thread.new do
         loop do
-          message = read(Frames::Message)
+          message = read Frames::Message
           if subscriber = subscriptions[message.headers['destination']]
             subscriber.call message
           end

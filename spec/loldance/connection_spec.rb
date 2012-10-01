@@ -128,4 +128,20 @@ describe Loldance::Connection do
 
   end
 
+  context "disconnect" do
+
+    Given!(:connection) { Loldance::Connection.new server, options }
+
+    When do
+      socket.stub!(:gets => frame(:receipt))
+      connection.disconnect
+    end
+
+    Then do
+      socket.should have_received(:write).with(frame(:disconnect))
+      socket.should have_received(:gets).with("\x00").ordered
+    end
+
+  end
+
 end

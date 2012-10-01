@@ -76,6 +76,9 @@ class Loldance
     class Message < ServerFrame
     end
 
+    class Receipt < ServerFrame
+    end
+
     class Send < Frame
       def initialize(queue, body, hdrs)
         headers['destination'] = queue
@@ -97,6 +100,12 @@ class Loldance
     class Unsubscribe < Frame
       def initialize(queue)
         headers['id'] = queue
+      end
+    end
+
+    class Disconnect < Frame
+      def initialize
+        headers['receipt'] = '0'
       end
     end
   end
