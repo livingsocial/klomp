@@ -2,21 +2,21 @@
 
 Gem::Specification.new do |s|
   s.name = "loldance"
-  s.version = "0.0.1.20120928194737"
+  s.version = "0.0.1.20121001122316"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nick Sieger"]
-  s.date = "2012-09-28"
-  s.description = "The [Stomp Dance] is described as a \"drunken,\" \"crazy,\" or \"inspirited\" dance in\nthe native Creek Indian language. Not unlike what one finds when one looks for\nRuby STOMP clients.\n\nThe purpose of Loldance is to be the simplest possible Stomp client. No\nin-memory buffering of outgoing messages, no fanout subscriptions in-process, no\ntransactions, no complicated messaging patterns.\n\n[Stomp Dance]: http://en.wikipedia.org/wiki/Stomp_dance"
+  s.date = "2012-10-01"
+  s.description = "Loldance is a simple [STOMP] messaging client that keeps your sanity intact.\n\nThe [Stomp Dance] is described as a \"drunken,\" \"crazy,\" or \"inspirited\" dance in\nthe native Creek Indian language. Not unlike what one finds when one looks for\nRuby STOMP clients.\n\nThe purpose of Loldance is to be the simplest possible Stomp client. No\nin-memory buffering of outgoing messages, no fanout subscriptions in-process, no\ntransactions, no complicated messaging patterns. No crazy dances.\n\n[Stomp]: http://stomp.github.com/\n[Stomp Dance]: http://en.wikipedia.org/wiki/Stomp_dance"
   s.email = ["nick.sieger@livingsocial.com"]
   s.extra_rdoc_files = ["Manifest.txt"]
-  s.files = [".rspec", ".rvmrc", "CHANGELOG.md", "Gemfile", "Gemfile.lock", "Manifest.txt", "README.md", "Rakefile", "lib/loldance.rb", "spec/spec_helper.rb", ".gemtest"]
+  s.files = [".rspec", ".rvmrc", ".simplecov", "CHANGELOG.md", "Gemfile", "Gemfile.lock", "Manifest.txt", "README.md", "Rakefile", "lib/loldance.rb", "lib/loldance/connection.rb", "lib/loldance/frames.rb", "loldance.gemspec", "spec/acceptance/acceptance_spec.rb", "spec/frames/auth_error.txt", "spec/frames/connect.txt", "spec/frames/connected.txt", "spec/frames/disconnect.txt", "spec/frames/greeting.txt", "spec/frames/message.txt", "spec/frames/receipt.txt", "spec/frames/subscribe.txt", "spec/frames/unsubscribe.txt", "spec/loldance/connection_spec.rb", "spec/loldance/frames_spec.rb", "spec/loldance_spec.rb", "spec/spec_helper.rb", "spec/support/have_received.rb", ".gemtest"]
   s.homepage = "http://github.com/livingsocial/loldance"
   s.rdoc_options = ["--main", "README.md"]
   s.require_paths = ["lib"]
   s.rubyforge_project = "loldance"
   s.rubygems_version = "1.8.24"
-  s.summary = "The [Stomp Dance] is described as a \"drunken,\" \"crazy,\" or \"inspirited\" dance in the native Creek Indian language"
+  s.summary = "Loldance is a simple [STOMP] messaging client that keeps your sanity intact"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rspec>, ["~> 2.11.0"])
       s.add_development_dependency(%q<ZenTest>, ["~> 4.8.0"])
       s.add_development_dependency(%q<rspec-given>, ["~> 1.0"])
+      s.add_development_dependency(%q<simplecov>, ["~> 0.6.0"])
       s.add_development_dependency(%q<hoe>, ["~> 3.0"])
     else
       s.add_dependency(%q<rdoc>, ["~> 3.10"])
@@ -38,6 +39,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rspec>, ["~> 2.11.0"])
       s.add_dependency(%q<ZenTest>, ["~> 4.8.0"])
       s.add_dependency(%q<rspec-given>, ["~> 1.0"])
+      s.add_dependency(%q<simplecov>, ["~> 0.6.0"])
       s.add_dependency(%q<hoe>, ["~> 3.0"])
     end
   else
@@ -48,6 +50,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rspec>, ["~> 2.11.0"])
     s.add_dependency(%q<ZenTest>, ["~> 4.8.0"])
     s.add_dependency(%q<rspec-given>, ["~> 1.0"])
+    s.add_dependency(%q<simplecov>, ["~> 0.6.0"])
     s.add_dependency(%q<hoe>, ["~> 3.0"])
   end
 end

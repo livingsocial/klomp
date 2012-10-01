@@ -4,14 +4,17 @@
 
 ## DESCRIPTION:
 
+Loldance is a simple [STOMP] messaging client that keeps your sanity intact.
+
 The [Stomp Dance] is described as a "drunken," "crazy," or "inspirited" dance in
 the native Creek Indian language. Not unlike what one finds when one looks for
 Ruby STOMP clients.
 
 The purpose of Loldance is to be the simplest possible Stomp client. No
 in-memory buffering of outgoing messages, no fanout subscriptions in-process, no
-transactions, no complicated messaging patterns.
+transactions, no complicated messaging patterns. No crazy dances.
 
+[Stomp]: http://stomp.github.com/
 [Stomp Dance]: http://en.wikipedia.org/wiki/Stomp_dance
 
 ## FEATURES:
