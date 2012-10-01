@@ -16,13 +16,13 @@ class Loldance
       end
 
       def to_s
-        "#{name}\n#{dump_headers}\n\n#{@body}#{FRAME_SEP}"
+        "#{name}\n#{dump_headers}\n#{@body}#{FRAME_SEP}"
       end
 
       def dump_headers
-        @headers.map do |pair|
+        headers.map do |pair|
           pair.map {|x| x.gsub("\n","\\n").gsub(":","\\c").gsub("\\", "\\\\") }.join(':')
-        end.join("\n")
+        end.join("\n").tap {|s| s << "\n" unless s.empty? }
       end
     end
 
