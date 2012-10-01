@@ -110,6 +110,21 @@ describe Loldance::Connection do
 
     end
 
+    context "does not dispatch if an error frame was read" do
+
+      When do
+        connection.subscribe "/queue/greeting", subscriber
+        socket.stub!(:gets).and_return frame(:error)
+        connection.instance_eval { @closed = true }
+        thread.block.call
+      end
+
+      Then do
+        subscriber.should_not have_received(:call)
+      end
+
+    end
+
     context "fails if neither a subscriber nor a block is given" do
 
       When(:expect_subscribe) { expect { connection.subscribe("/queue/greeting") } }

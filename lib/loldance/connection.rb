@@ -80,13 +80,14 @@ class Loldance
         loop do
           begin
             message = read Frames::Message
+            raise Error, message.headers['message'] if message.error?
             if subscriber = subscriptions[message.headers['destination']]
               subscriber.call message
             end
           rescue DISCONNECT
             break
           rescue => e
-            $stderr.puts e.to_s, *e.backtrace
+            $stderr.puts e.to_s, *e.backtrace if $debug
             # don't die if an exception occurs, just check if we've been closed
             # TODO: log exception
           end
