@@ -5,9 +5,10 @@ class Loldance
 
   attr_reader :connections
 
-  def initialize(servers)
+  def initialize(servers, options = {})
+    servers = [servers].flatten
     raise ArgumentError, "no servers given" if servers.empty?
-    @connections = servers.map {|s| Connection.new(s) }
+    @connections = servers.map {|s| Connection.new(s, options) }
   end
 
   def publish(queue, body, headers = {})
@@ -28,6 +29,15 @@ class Loldance
 
   def unsubscribe(queue)
     connections.each {|conn| conn.unsubscribe(queue) rescue nil }
+  end
+
+  def connected?
+    connections.detect(&:connected?)
+  end
+
+  def disconnect
+    connections.each {|conn| conn.disconnect }
+    @connections = []
   end
 end
 

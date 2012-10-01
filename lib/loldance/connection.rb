@@ -32,30 +32,26 @@ class Loldance
       write Frames::Unsubscribe.new(queue)
     end
 
+    def connected?
+      @socket && !@closed
+    end
+
     def disconnect
       @closed = true
+      stop_subscriber_thread
       write Frames::Disconnect.new
       read Frames::Receipt
+      @socket.close rescue nil
+      @socket = nil
     end
 
     private
-    def start_subscriber_thread
-      @subscriber_thread ||= Thread.new do
-        loop do
-          message = read Frames::Message
-          if subscriber = subscriptions[message.headers['destination']]
-            subscriber.call message
-          end
-          break if @closed
-        end
-      end
-    end
-
     def connect
       @socket  = TCPSocket.new *options['server']
       @socket.set_encoding 'UTF-8'
       write Frames::Connect.new(options)
-      read Frames::Connected, 0.1
+      frame = read Frames::Connected, 0.1
+      raise Loldance::Error, frame.headers['message'] if frame.error?
     end
 
     def write(frame)
@@ -68,6 +64,28 @@ class Loldance
       rs, = IO.select([@socket], nil, nil, timeout)
       raise Error, "connection unavailable for read" unless rs && !rs.empty?
       type.new @socket.gets(FRAME_SEP)
+    end
+
+    def start_subscriber_thread
+      @subscriber_thread ||= Thread.new do
+        loop do
+          begin
+            message = read Frames::Message
+            if subscriber = subscriptions[message.headers['destination']]
+              subscriber.call message
+            end
+          rescue
+            # don't die if an exception occurs, just check if we've been closed
+            # TODO: log exception
+          end
+          break if @closed
+        end
+      end
+    end
+
+    def stop_subscriber_thread
+      @subscriber_thread.raise "disconnect" if @subscriber_thread
+      @subscriber_thread = nil
     end
   end
 end

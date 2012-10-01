@@ -20,6 +20,16 @@ describe Loldance::Connection do
       socket.should have_received(:gets).with("\x00").ordered
     end
 
+
+  end
+
+  context "new with connection error" do
+
+    Given(:data) { frame(:auth_error) }
+
+    When(:expect_connect) { expect { Loldance::Connection.new server, options } }
+
+    Then { expect_connect.to raise_error(Loldance::Error) }
   end
 
   context "publish" do
@@ -133,13 +143,14 @@ describe Loldance::Connection do
     Given!(:connection) { Loldance::Connection.new server, options }
 
     When do
-      socket.stub!(:gets => frame(:receipt))
+      socket.stub!(:gets => frame(:receipt), :close => nil)
       connection.disconnect
     end
 
     Then do
       socket.should have_received(:write).with(frame(:disconnect))
       socket.should have_received(:gets).with("\x00").ordered
+      socket.should have_received(:close)
     end
 
   end

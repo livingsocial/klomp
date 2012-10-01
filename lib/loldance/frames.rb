@@ -50,7 +50,7 @@ class Loldance
               @error = frame == "ERROR"
               if !@error && frame != name
                 raise Loldance::FrameError,
-                  "unexpected frame #{frame} (expected #{name})"
+                  "unexpected frame #{frame} (expected #{name}):\n#{data}"
               end
               next
             end

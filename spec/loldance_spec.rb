@@ -35,7 +35,7 @@ describe Loldance do
 
       When(:loldance) { Loldance.new servers }
 
-      Then { servers.each {|s| Loldance::Connection.should have_received(:new).with(s) } }
+      Then { servers.each {|s| Loldance::Connection.should have_received(:new).with(s, {}) } }
 
     end
 
@@ -145,6 +145,20 @@ describe Loldance do
       When { loldance.unsubscribe("/queue/greeting") }
 
       Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting") } }
+
+    end
+
+  end
+
+  context "disconnect" do
+
+    context "disconnects all the servers" do
+
+      Given { connections.values.each {|conn| conn.stub!(:disconnect) } }
+
+      When { loldance.disconnect }
+
+      Then { connections.values.each {|conn| conn.should have_received(:disconnect) } }
 
     end
 
