@@ -43,12 +43,28 @@ describe "Loldance acceptance", :acceptance => true do
     When do
       subscriber.stub!(:call).and_return {|msg| subscriber.stub!(:message => msg) }
       loldance.subscribe "/queue/greeting", subscriber
+      sleep 1         # HAX: waiting for message to be pushed back and processed
     end
 
     Then do
-      sleep 1
       subscriber.should have_received(:call).with(an_instance_of(Loldance::Frames::Message))
       subscriber.message.body.should == "hello subscriber!"
+    end
+
+
+    context "and unsubscribe" do
+
+      When do
+        subscriber.reset
+        loldance.unsubscribe "/queue/greeting"
+        loldance.publish "/queue/greeting", "hello subscriber?"
+        sleep 1
+      end
+
+      Then do
+        subscriber.should_not have_received(:call)
+      end
+
     end
 
   end

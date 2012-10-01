@@ -40,6 +40,9 @@ module RSpec::Mocks::Methods
     end
   end
 
+  def reset
+    __mock_proxy.reset
+  end
 end
 
 class RSpec::Mocks::MessageExpectation
