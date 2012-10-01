@@ -38,7 +38,7 @@ class Loldance
       private
       def parse(data)
         headers, body = data.split("\n\n")
-        [parse_headers(headers), body.chomp("\000")]
+        [parse_headers(headers), body.chomp(FRAME_SEP)]
       end
 
       def parse_headers(data)
@@ -55,7 +55,7 @@ class Loldance
               end
               next
             end
-            kv = line.chomp.split(':').map {|x| x.gsub("\\n","\n").gsub("\\c",":").gsub("\\\\", "\\")}
+            kv = line.chomp.split(':').map {|x| x.gsub("\\n","\n").gsub("\\c",":").gsub("\\\\", "\\") }
             headers[kv.first] = kv.last
           end
         end
@@ -103,8 +103,6 @@ class Loldance
     end
 
     class Disconnect < Frame
-      def initialize
-      end
     end
   end
 end
