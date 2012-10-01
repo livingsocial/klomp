@@ -12,6 +12,7 @@ gem "hoe-git", "~>1.5.0", :group => [:development, :test]
 gem "rspec", "~>2.11.0", :group => [:development, :test]
 gem "ZenTest", "~>4.8.0", :group => [:development, :test]
 gem "rspec-given", "~>1.0", :group => [:development, :test]
+gem "simplecov", "~>0.6.0", :group => [:development, :test]
 gem "hoe", "~>3.0", :group => [:development, :test]
 
 # vim: syntax=ruby

@@ -1,3 +1,4 @@
+require 'simplecov'
 require 'loldance'
 require 'rspec'
 require 'rspec-given'
