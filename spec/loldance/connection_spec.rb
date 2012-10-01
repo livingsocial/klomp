@@ -20,7 +20,18 @@ describe Loldance::Connection do
       socket.should have_received(:gets).with("\x00").ordered
     end
 
+  end
 
+  context "new with vhost" do
+
+    Given(:server) { "virtual-host:127.0.0.1:61613" }
+
+    When { Loldance::Connection.new server, options }
+
+    Then do
+      TCPSocket.should have_received(:new).with("127.0.0.1", 61613)
+      socket.should have_received(:write).with(frame(:connect_vhost)).ordered
+    end
   end
 
   context "new with connection error" do

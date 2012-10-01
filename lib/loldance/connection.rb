@@ -7,9 +7,11 @@ class Loldance
     attr_reader :options, :subscriptions
 
     def initialize(server, options={})
-      host, port = server.split ':'
+      address = server.split ':'
+      port, host = address.pop.to_i, address.pop
       @options = options
       @options['server'] = [host, port.to_i]
+      @options['host'] ||= address.pop unless address.empty?
       @options['host'] ||= host
       @subscriptions = {}
       connect
