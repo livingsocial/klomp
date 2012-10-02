@@ -4,7 +4,7 @@ class Loldance
   FRAME_SEP = "\x00"          # null character is frame separator
   class Connection
 
-    attr_reader :options, :subscriptions
+    attr_reader :options, :subscriptions, :logger
 
     def initialize(server, options={})
       address = server.split ':'
@@ -49,6 +49,7 @@ class Loldance
 
     def reconnect
       return if connected?
+      logger.warn "reconnect server=#{options['server'].join(':')}" if logger
       connect
       subs = subscriptions.dup
       subscriptions.clear
@@ -61,7 +62,7 @@ class Loldance
       @socket.set_encoding 'UTF-8'
       write Frames::Connect.new(options)
       frame = read Frames::Connected, 0.1
-      log_frame frame if @logger
+      log_frame frame if logger
       raise Error, frame.headers['message'] if frame.error?
     end
 
@@ -73,7 +74,7 @@ class Loldance
       raise Error, "connection unavailable for write" unless ws && !ws.empty?
 
       @socket.write frame.to_s
-      log_frame frame if @logger
+      log_frame frame if logger
     rescue Error
       raise
     rescue
@@ -93,10 +94,15 @@ class Loldance
     end
 
     def log_frame(frame)
-      return unless @logger.debug?
+      return unless logger.debug?
       body = frame.body
       body = body.lines.first.chomp + '...' if body =~ /\n/
-      @logger.debug "frame=#{frame.name} #{frame.headers.map{|k,v| k + '=' + v }.join(' ')} body=#{body}"
+      logger.debug "frame=#{frame.name} #{frame.headers.map{|k,v| k + '=' + v }.join(' ')} body=#{body}"
+    end
+
+    def log_exception(ex, level = :error)
+      logger.send level, "exception=#{ex.class.name} message=#{ex.message.inspect} backtrace[0]=#{ex.backtrace[0]} backtrace[1]=#{ex.backtrace[1]}"
+      logger.debug "exception=#{ex.class.name} full_backtrace=" + ex.backtrace.join("\n")
     end
 
     def close!
@@ -124,9 +130,7 @@ class Loldance
           rescue INTERRUPT
             break
           rescue => e
-            $stderr.puts e.to_s, *e.backtrace if $debug
-            # don't die if an exception occurs, just check if we've been closed
-            # TODO: log exception
+            log_exception(e, :warn) if logger
           end
           break if @closing
         end

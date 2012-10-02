@@ -6,7 +6,7 @@ describe Loldance::Connection do
   Given(:server)     { "127.0.0.1:61613" }
   Given(:options)    { { "login" => "admin", "passcode" => "password", "logger" => logger } }
   Given(:socket)     { double(TCPSocket, gets:data, write:nil, set_encoding:nil, close:nil) }
-  Given(:logger)     { double("Logger").as_null_object }
+  Given(:logger)     { double("Logger", error:nil, warn:nil, info:nil, debug:nil).as_null_object }
   Given(:subscriber) { double "subscriber", call:nil }
   Given(:thread)     { double Thread }
 
@@ -139,9 +139,9 @@ describe Loldance::Connection do
         thread.block.call
       end
 
-      Then do
-        subscriber.should_not have_received(:call)
-      end
+      Then { subscriber.should_not have_received(:call) }
+
+      Then { logger.should have_received(:warn) }
 
     end
 
@@ -277,6 +277,8 @@ describe Loldance::Connection do
       When { connection.reconnect }
 
       Then { connection.should be_connected }
+
+      Then { logger.should have_received(:warn) }
 
     end
 
