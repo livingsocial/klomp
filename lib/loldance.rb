@@ -42,4 +42,5 @@ class Loldance
 end
 
 require 'loldance/connection'
+require 'loldance/sentinel'
 require 'loldance/frames'
