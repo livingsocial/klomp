@@ -39,6 +39,21 @@ describe Loldance::Connection do
       TCPSocket.should have_received(:new).with("127.0.0.1", 61613)
       socket.should have_received(:write).with(frame(:connect_vhost)).ordered
     end
+
+  end
+
+  context "new with stomp:// URL" do
+
+    Given(:server) { "stomp://admin:password@127.0.0.1:61613?host=virtual-host" }
+    Given(:options) { {} }
+
+    When { Loldance::Connection.new server, options }
+
+    Then do
+      TCPSocket.should have_received(:new).with("127.0.0.1", 61613)
+      socket.should have_received(:write).with(frame(:connect_vhost)).ordered
+    end
+
   end
 
   context "new with connection error" do

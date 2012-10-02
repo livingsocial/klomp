@@ -1,4 +1,5 @@
 require 'socket'
+require 'uri'
 
 class Loldance
   FRAME_SEP = "\x00"          # null character is frame separator
@@ -7,14 +8,26 @@ class Loldance
     attr_reader :options, :subscriptions, :logger
 
     def initialize(server, options={})
-      address = server.split ':'
-      port, host = address.pop.to_i, address.pop
       @options = options
-      @options['server'] = [host, port.to_i]
-      @options['host'] ||= address.pop unless address.empty?
-      @options['host'] ||= host
-      @logger = options['logger']
+
+      if server =~ /^stomp:\/\//
+        uri                  = URI.parse server
+        host, port           = uri.host, uri.port
+        @options['login']    = uri.user if uri.user
+        @options['passcode'] = uri.password if uri.password
+        if uri.query && !uri.query.empty?
+          uri.query.split('&').each {|pair| k, v = pair.split('=', 2); @options[k] = v }
+        end
+      else
+        address            = server.split ':'
+        port, host         = address.pop.to_i, address.pop
+        @options['host'] ||= address.pop unless address.empty?
+      end
+
+      @options['server']   = [host, port]
+      @options['host']   ||= host
       @subscriptions = {}
+      @logger = options['logger']
       connect
     end
 
