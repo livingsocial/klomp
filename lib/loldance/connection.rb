@@ -57,7 +57,7 @@ class Loldance
       @socket.set_encoding 'UTF-8'
       write Frames::Connect.new(options)
       frame = read Frames::Connected, 0.1
-      raise Loldance::Error, frame.headers['message'] if frame.error?
+      raise Error, frame.headers['message'] if frame.error?
     end
 
     def write(frame)
@@ -73,7 +73,7 @@ class Loldance
       type.new @socket.gets(FRAME_SEP)
     end
 
-    DISCONNECT = Class.new(StandardError)
+    INTERRUPT = Class.new(StandardError)
 
     def start_subscriber_thread
       @subscriber_thread ||= Thread.new do
@@ -84,8 +84,7 @@ class Loldance
             if subscriber = subscriptions[message.headers['destination']]
               subscriber.call message
             end
-          rescue DISCONNECT
-            break
+          rescue INTERRUPT
           rescue => e
             $stderr.puts e.to_s, *e.backtrace if $debug
             # don't die if an exception occurs, just check if we've been closed
@@ -97,7 +96,7 @@ class Loldance
     end
 
     def stop_subscriber_thread
-      @subscriber_thread.raise DISCONNECT, "disconnect" if @subscriber_thread
+      @subscriber_thread.raise INTERRUPT, "disconnect" if @subscriber_thread
       @subscriber_thread = nil
     end
   end
