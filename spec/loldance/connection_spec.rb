@@ -2,12 +2,13 @@ require 'spec_helper'
 
 describe Loldance::Connection do
 
-  Given(:data) { frame(:connected) }
-  Given(:socket) { double(TCPSocket, gets:data, write:nil, set_encoding:nil, close:nil) }
-  Given(:server) { "127.0.0.1:61613" }
-  Given(:options) { { "login" => "admin", "passcode" => "password" } }
+  Given(:data)       { frame(:connected) }
+  Given(:server)     { "127.0.0.1:61613" }
+  Given(:options)    { { "login" => "admin", "passcode" => "password", "logger" => logger } }
+  Given(:socket)     { double(TCPSocket, gets:data, write:nil, set_encoding:nil, close:nil) }
+  Given(:logger)     { double("Logger").as_null_object }
   Given(:subscriber) { double "subscriber", call:nil }
-  Given(:thread) { double Thread }
+  Given(:thread)     { double Thread }
 
   Given do
     IO.stub!(:select).and_return([[socket], [socket]])
@@ -57,6 +58,14 @@ describe Loldance::Connection do
 
     Then { socket.should have_received(:write).with(frame(:greeting)) }
 
+    context "logs when logger level is debug" do
+
+      Given(:logger) { double("Logger").as_null_object.tap {|l| l.stub!(debug?: true) } }
+
+      Then { logger.should have_received(:debug) }
+
+    end
+
   end
 
   context "subscribe" do
@@ -68,6 +77,14 @@ describe Loldance::Connection do
       When { connection.subscribe "/queue/greeting", subscriber }
 
       Then { socket.should have_received(:write).with(frame(:subscribe)) }
+
+      context "and logs when logger level is debug" do
+
+        Given(:logger) { double("Logger").as_null_object.tap {|l| l.stub!(debug?: true) } }
+
+        Then { logger.should have_received(:debug) }
+
+      end
 
     end
 

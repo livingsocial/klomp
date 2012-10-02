@@ -13,6 +13,7 @@ class Loldance
       @options['server'] = [host, port.to_i]
       @options['host'] ||= address.pop unless address.empty?
       @options['host'] ||= host
+      @logger = options['logger']
       @subscriptions = {}
       connect
     end
@@ -60,6 +61,7 @@ class Loldance
       @socket.set_encoding 'UTF-8'
       write Frames::Connect.new(options)
       frame = read Frames::Connected, 0.1
+      log_frame frame if @logger
       raise Error, frame.headers['message'] if frame.error?
     end
 
@@ -71,6 +73,7 @@ class Loldance
       raise Error, "connection unavailable for write" unless ws && !ws.empty?
 
       @socket.write frame.to_s
+      log_frame frame if @logger
     rescue Error
       raise
     rescue
@@ -87,6 +90,13 @@ class Loldance
     rescue
       trash_socket_and_launch_sentinel
       raise
+    end
+
+    def log_frame(frame)
+      return unless @logger.debug?
+      body = frame.body
+      body = body.lines.first.chomp + '...' if body =~ /\n/
+      @logger.debug "frame=#{frame.name} #{frame.headers.map{|k,v| k + '=' + v }.join(' ')} body=#{body}"
     end
 
     def close!
