@@ -46,6 +46,11 @@ class Loldance
       @socket = nil
     end
 
+    def reconnect
+      return if connected?
+      connect
+    end
+
     private
     def connect
       @socket  = TCPSocket.new *options['server']

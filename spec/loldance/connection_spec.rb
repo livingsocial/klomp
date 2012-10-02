@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Loldance::Connection do
 
   Given(:data) { frame(:connected) }
-  Given(:socket) { double(TCPSocket, gets:data, write:nil, set_encoding:nil) }
+  Given(:socket) { double(TCPSocket, gets:data, write:nil, set_encoding:nil, close:nil) }
   Given(:server) { "127.0.0.1:61613" }
   Given(:options) { { "login" => "admin", "passcode" => "password" } }
 
@@ -179,10 +179,7 @@ describe Loldance::Connection do
 
     Given!(:connection) { Loldance::Connection.new server, options }
 
-    When do
-      socket.stub!(:close => nil)
-      connection.disconnect
-    end
+    When { connection.disconnect }
 
     Then do
       socket.should have_received(:write).with(frame(:disconnect))
@@ -201,7 +198,6 @@ describe Loldance::Connection do
 
     Given!(:connection) { Loldance::Connection.new server, options }
     Given do
-      socket.stub!(:close => nil)
       socket.stub!(:write).and_raise SystemCallError.new("some socket error")
     end
 
@@ -232,7 +228,6 @@ describe Loldance::Connection do
     Given do
       Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
       thread.stub!(:raise).and_return {|e| raise e }
-      socket.stub!(:close => nil)
       socket.stub!(:gets).and_raise SystemCallError.new("some socket error")
     end
 
@@ -242,6 +237,34 @@ describe Loldance::Connection do
     end
 
     Then { connection.should_not be_connected }
+
+  end
+
+  context "reconnect" do
+
+    Given!(:connection) { Loldance::Connection.new server, options }
+
+    context "creates new socket" do
+
+      Given { connection.disconnect }
+
+      When { connection.reconnect }
+
+      Then { connection.should be_connected }
+
+    end
+
+    context "has no effect if connection is already connected" do
+
+      Given { socket.messages_received.clear }
+
+      When { connection.reconnect }
+
+      Then { connection.should be_connected }
+
+      Then { socket.should_not have_received(:write) }
+
+    end
 
   end
 
