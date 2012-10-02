@@ -35,16 +35,11 @@ class Loldance
       write Frames::Unsubscribe.new(queue) if subscriptions.delete queue
     end
 
-    def connected?
-      @socket && !@closed
-    end
-
-    def closed?
-      @closed && @socket.nil?
-    end
+    def connected?()    @socket end
+    def closed?()       @closing && @socket.nil? end
 
     def disconnect
-      @closed = true
+      close!
       stop_subscriber_thread
       write Frames::Disconnect.new rescue nil
       @socket.close rescue nil
@@ -62,9 +57,17 @@ class Loldance
 
     def write(frame)
       raise Error, "connection closed" if closed?
+      raise Error, "disconnected"      unless connected?
+
       rs, ws, = IO.select(nil, [@socket], nil, 0.1)
       raise Error, "connection unavailable for write" unless ws && !ws.empty?
+
       @socket.write frame.to_s
+    rescue Error
+      raise
+    rescue
+      discard_socket
+      raise
     end
 
     def read(type, timeout = nil)
@@ -73,7 +76,17 @@ class Loldance
       type.new @socket.gets(FRAME_SEP)
     end
 
-    INTERRUPT = Class.new(StandardError)
+    def close!
+      @closing = true
+    end
+
+    def discard_socket
+      stop_subscriber_thread
+      @socket.close rescue nil
+      @socket = nil
+    end
+
+    INTERRUPT = Class.new(Error)
 
     def start_subscriber_thread
       @subscriber_thread ||= Thread.new do
@@ -85,12 +98,13 @@ class Loldance
               subscriber.call message
             end
           rescue INTERRUPT
+            break
           rescue => e
             $stderr.puts e.to_s, *e.backtrace if $debug
             # don't die if an exception occurs, just check if we've been closed
             # TODO: log exception
           end
-          break if @closed
+          break if @closing
         end
       end
     end

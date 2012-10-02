@@ -100,7 +100,7 @@ describe Loldance::Connection do
       When do
         connection.subscribe "/queue/greeting", subscriber
         socket.stub!(:gets).and_return frame(:message)
-        connection.instance_eval { @closed = true }
+        connection.send :close!
         thread.block.call
       end
 
@@ -115,7 +115,7 @@ describe Loldance::Connection do
       When do
         connection.subscribe "/queue/greeting", subscriber
         socket.stub!(:gets).and_return frame(:error)
-        connection.instance_eval { @closed = true }
+        connection.send :close!
         thread.block.call
       end
 
@@ -192,6 +192,32 @@ describe Loldance::Connection do
     context "makes connection useless (raises error)" do
 
       Then { expect { connection.publish "/queue/greeting", "hello" }.to raise_error(Loldance::Error) }
+
+    end
+
+  end
+
+  context "socket error on write causes connection to be disconnected" do
+
+    Given!(:connection) { Loldance::Connection.new server, options }
+    Given do
+      socket.stub!(:close => nil)
+      socket.stub!(:write).and_raise SystemCallError.new("some socket error")
+    end
+
+    When(:expect_publish) { expect { connection.publish "/queue/greeting", "hello" } }
+
+    Then do
+      expect_publish.to raise_error(SystemCallError)
+      connection.should_not be_connected
+    end
+
+    context "and subsequent calls raise Loldance::Error" do
+
+      Then do
+        expect_publish.to raise_error(SystemCallError)
+        expect_publish.to raise_error(Loldance::Error)
+      end
 
     end
 
