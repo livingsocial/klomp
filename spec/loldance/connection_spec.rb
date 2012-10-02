@@ -6,9 +6,14 @@ describe Loldance::Connection do
   Given(:socket) { double(TCPSocket, gets:data, write:nil, set_encoding:nil, close:nil) }
   Given(:server) { "127.0.0.1:61613" }
   Given(:options) { { "login" => "admin", "passcode" => "password" } }
+  Given(:subscriber) { double "subscriber", call:nil }
+  Given(:thread) { double Thread }
 
-  Given { IO.stub!(:select).and_return([[socket], [socket]])
-    TCPSocket.stub!(:new).and_return socket }
+  Given do
+    IO.stub!(:select).and_return([[socket], [socket]])
+    TCPSocket.stub!(:new).and_return socket
+    Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
+  end
 
   context "new" do
 
@@ -56,9 +61,6 @@ describe Loldance::Connection do
   context "subscribe" do
 
     Given!(:connection) { Loldance::Connection.new server, options }
-    Given(:subscriber) { double "subscriber", call:nil }
-    Given(:thread) { double Thread }
-    Given { Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread } }
 
     context "writes the subscribe message" do
 
@@ -222,11 +224,8 @@ describe Loldance::Connection do
   context "socket error on read causes connection to be disconnected" do
 
     Given!(:connection) { Loldance::Connection.new server, options }
-    Given(:subscriber) { double "subscriber", call:nil }
-    Given(:thread) { double Thread }
 
     Given do
-      Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
       thread.stub!(:raise).and_return {|e| raise e }
       socket.stub!(:gets).and_raise SystemCallError.new("some socket error")
     end
