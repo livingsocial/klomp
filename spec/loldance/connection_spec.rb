@@ -265,6 +265,21 @@ describe Loldance::Connection do
 
     end
 
+    context "re-subscribes all subscriptions" do
+
+      Given do
+        connection.subscribe "/queue/greeting", subscriber
+        thread.stub!(:raise)
+        connection.disconnect
+        socket.messages_received.clear
+      end
+
+      When { connection.reconnect }
+
+      Then { socket.should have_received(:write).with(frame(:subscribe)) }
+
+    end
+
   end
 
 end

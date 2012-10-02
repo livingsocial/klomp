@@ -49,6 +49,9 @@ class Loldance
     def reconnect
       return if connected?
       connect
+      subs = subscriptions.dup
+      subscriptions.clear
+      subs.each {|queue, subscriber| subscribe(queue, subscriber) }
     end
 
     private
