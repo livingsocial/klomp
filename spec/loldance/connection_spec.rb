@@ -223,4 +223,26 @@ describe Loldance::Connection do
 
   end
 
+  context "socket error on read causes connection to be disconnected" do
+
+    Given!(:connection) { Loldance::Connection.new server, options }
+    Given(:subscriber) { double "subscriber", call:nil }
+    Given(:thread) { double Thread }
+
+    Given do
+      Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
+      thread.stub!(:raise).and_return {|e| raise e }
+      socket.stub!(:close => nil)
+      socket.stub!(:gets).and_raise SystemCallError.new("some socket error")
+    end
+
+    When do
+      connection.subscribe "/queue/greeting", subscriber
+      thread.block.call
+    end
+
+    Then { connection.should_not be_connected }
+
+  end
+
 end

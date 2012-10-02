@@ -74,6 +74,11 @@ class Loldance
       rs, = IO.select([@socket], nil, nil, timeout)
       raise Error, "connection unavailable for read" unless rs && !rs.empty?
       type.new @socket.gets(FRAME_SEP)
+    rescue Error
+      raise
+    rescue
+      discard_socket
+      raise
     end
 
     def close!
@@ -81,9 +86,9 @@ class Loldance
     end
 
     def discard_socket
-      stop_subscriber_thread
       @socket.close rescue nil
       @socket = nil
+      stop_subscriber_thread
     end
 
     INTERRUPT = Class.new(Error)
@@ -110,8 +115,8 @@ class Loldance
     end
 
     def stop_subscriber_thread
-      @subscriber_thread.raise INTERRUPT, "disconnect" if @subscriber_thread
-      @subscriber_thread = nil
+      thread, @subscriber_thread = @subscriber_thread, nil
+      thread.raise INTERRUPT, "disconnect" if thread
     end
   end
 end
