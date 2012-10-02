@@ -13,6 +13,7 @@ describe Loldance::Connection do
     IO.stub!(:select).and_return([[socket], [socket]])
     TCPSocket.stub!(:new).and_return socket
     Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
+    Loldance::Sentinel.stub!(new: double("sentinel"))
   end
 
   context "new" do
@@ -215,6 +216,15 @@ describe Loldance::Connection do
       Then do
         expect_publish.to raise_error(SystemCallError)
         expect_publish.to raise_error(Loldance::Error)
+      end
+
+    end
+
+    context "and starts reconnect sentinel" do
+
+      Then do
+        expect_publish.to raise_error(SystemCallError)
+        Loldance::Sentinel.should have_received(:new).with(connection)
       end
 
     end

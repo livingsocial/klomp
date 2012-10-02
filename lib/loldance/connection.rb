@@ -74,7 +74,7 @@ class Loldance
     rescue Error
       raise
     rescue
-      discard_socket
+      trash_socket_and_launch_sentinel
       raise
     end
 
@@ -85,7 +85,7 @@ class Loldance
     rescue Error
       raise
     rescue
-      discard_socket
+      trash_socket_and_launch_sentinel
       raise
     end
 
@@ -93,9 +93,10 @@ class Loldance
       @closing = true
     end
 
-    def discard_socket
+    def trash_socket_and_launch_sentinel
       @socket.close rescue nil
       @socket = nil
+      Sentinel.new(self)
       stop_subscriber_thread
     end
 
