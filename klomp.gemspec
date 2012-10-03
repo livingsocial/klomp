@@ -2,12 +2,12 @@
 
 Gem::Specification.new do |s|
   s.name = "klomp"
-  s.version = "0.0.1.20121001122316"
+  s.version = "0.0.1.20121003125341"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nick Sieger"]
-  s.date = "2012-10-01"
-  s.description = "Klomp is a simple [STOMP] messaging client that keeps your sanity intact.\n\nThe [Stomp Dance] is described as a \"drunken,\" \"crazy,\" or \"inspirited\" dance in\nthe native Creek Indian language. Not unlike what one finds when one looks for\nRuby STOMP clients.\n\nThe purpose of Klomp is to be the simplest possible Stomp client. No\nin-memory buffering of outgoing messages, no fanout subscriptions in-process, no\ntransactions, no complicated messaging patterns. No crazy dances.\n\n[Stomp]: http://stomp.github.com/\n[Stomp Dance]: http://en.wikipedia.org/wiki/Stomp_dance"
+  s.date = "2012-10-03"
+  s.description = "Klomp is a simple [Stomp] messaging client that keeps your sanity intact.\n\nThe purpose of Klomp is to be the simplest possible Stomp client. No in-memory\nbuffering of outgoing messages, no fanout subscriptions in-process, no\ntransactions, no complicated messaging patterns. Code simple enough so that when\nsomething goes wrong, the problem is obvious.\n\n[Stomp]: http://stomp.github.com/"
   s.email = ["nick.sieger@livingsocial.com"]
   s.extra_rdoc_files = ["Manifest.txt"]
   s.files = [".rspec", ".rvmrc", ".simplecov", "CHANGELOG.md", "Gemfile", "Gemfile.lock", "Manifest.txt", "README.md", "Rakefile", "lib/klomp.rb", "lib/klomp/connection.rb", "lib/klomp/frames.rb", "klomp.gemspec", "spec/acceptance/acceptance_spec.rb", "spec/frames/auth_error.txt", "spec/frames/connect.txt", "spec/frames/connected.txt", "spec/frames/disconnect.txt", "spec/frames/greeting.txt", "spec/frames/message.txt", "spec/frames/receipt.txt", "spec/frames/subscribe.txt", "spec/frames/unsubscribe.txt", "spec/klomp/connection_spec.rb", "spec/klomp/frames_spec.rb", "spec/klomp_spec.rb", "spec/spec_helper.rb", "spec/support/have_received.rb", ".gemtest"]
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubyforge_project = "klomp"
   s.rubygems_version = "1.8.24"
-  s.summary = "Klomp is a simple [STOMP] messaging client that keeps your sanity intact"
+  s.summary = "Klomp is a simple [Stomp] messaging client that keeps your sanity intact"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
