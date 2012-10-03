@@ -25,8 +25,11 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
 
-  unless queue_available?
-    config.filter_run_excluding :acceptance
+  config.filter_run_excluding :acceptance  unless queue_available?
+  if ENV['PERF']
+    config.filter_run :performance
+  else
+    config.filter_run_excluding :performance
   end
 
   config.include Frames

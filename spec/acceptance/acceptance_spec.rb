@@ -69,6 +69,72 @@ describe "Loldance acceptance", :acceptance => true do
 
   end
 
+  context "throughput test", :performance => true do
+
+    require 'benchmark'
+
+    Given(:num_threads) { (ENV['THREADS'] || 4).to_i }
+    Given(:msgs_per_thread) { (ENV['MSGS'] || 10000).to_i }
+    Given(:total) { num_threads * msgs_per_thread }
+
+    Given do
+      trap("QUIT") do
+        Thread.list.each do |t|
+          $stderr.puts
+          $stderr.puts t.inspect
+          $stderr.puts t.backtrace.join("\n  ")
+        end
+      end
+    end
+
+    Given { loldance }
+
+    Then do
+      Thread.abort_on_exception = true
+
+      roundtrip_time = Benchmark.realtime do
+
+        Thread.new do
+          publish_time = Benchmark.realtime do
+            threads = []
+            1.upto(num_threads) do |i|
+              threads << Thread.new do
+                1.upto(msgs_per_thread) do |j|
+                  id = i * j
+                  print "." if id % 100 == 0
+                  loldance.publish "/queue/greeting", "hello #{id}!", "id" => "greeting-#{id}"
+                end
+              end
+            end
+            threads.each(&:join)
+          end
+
+          puts "\n--------------------------------------------------------------------------------\n" \
+          "Sending   #{total} messages took #{publish_time} using #{num_threads} threads\n" \
+          "--------------------------------------------------------------------------------\n"
+        end
+
+        ids = []
+        subscribe_time = Benchmark.realtime do
+          loldance.subscribe "/queue/greeting" do |msg|
+            id = msg.headers['id'][/(\d+)/, 1].to_i
+            print "," if id % 100 == 0
+            ids << id
+          end
+
+          Thread.pass until ids.length == total
+        end
+
+        puts "\n--------------------------------------------------------------------------------\n" \
+        "Receiving #{total} messages took #{subscribe_time}\n" \
+        "--------------------------------------------------------------------------------\n"
+      end
+      puts "\n--------------------------------------------------------------------------------\n" \
+      "Roundtrip to process #{total} messages: #{roundtrip_time} (#{total/roundtrip_time} msgs/sec)\n" \
+      "--------------------------------------------------------------------------------\n"
+    end
+  end
+
   after { clients.each(&:disconnect) }
 
   def apollo_mgmt_url(path)
