@@ -2,25 +2,25 @@ require 'spec_helper'
 require 'json'
 require 'open-uri'
 
-describe "Loldance acceptance", :acceptance => true do
+describe "Klomp acceptance", :acceptance => true do
 
   Given(:server) { "127.0.0.1:61613" }
   Given(:credentials) { %w(admin password) }
   Given(:options) { Hash[*%w(login passcode).zip(credentials).flatten] }
   Given(:clients) { [] }
-  Given(:loldance) { Loldance.new(server, options).tap {|l| clients << l } }
+  Given(:klomp) { Klomp.new(server, options).tap {|l| clients << l } }
 
   context "connect" do
 
-    When { loldance }
+    When { klomp }
 
-    Then { loldance.should be_connected }
+    Then { klomp.should be_connected }
 
   end
 
   context "publish" do
 
-    When { loldance.publish "/queue/greeting", "hello" }
+    When { klomp.publish "/queue/greeting", "hello" }
 
     Then do
       vhosts = apollo_api_get_json "/broker/virtual-hosts.json"
@@ -38,16 +38,16 @@ describe "Loldance acceptance", :acceptance => true do
   context "subscribe" do
 
     Given(:subscriber) { double("subscriber") }
-    Given { loldance.publish "/queue/greeting", "hello subscriber!" }
+    Given { klomp.publish "/queue/greeting", "hello subscriber!" }
 
     When do
       subscriber.stub!(:call).and_return {|msg| subscriber.stub!(:message => msg) }
-      loldance.subscribe "/queue/greeting", subscriber
+      klomp.subscribe "/queue/greeting", subscriber
       sleep 1         # HAX: waiting for message to be pushed back and processed
     end
 
     Then do
-      subscriber.should have_received(:call).with(an_instance_of(Loldance::Frames::Message))
+      subscriber.should have_received(:call).with(an_instance_of(Klomp::Frames::Message))
       subscriber.message.body.should == "hello subscriber!"
     end
 
@@ -56,8 +56,8 @@ describe "Loldance acceptance", :acceptance => true do
 
       When do
         subscriber.reset
-        loldance.unsubscribe "/queue/greeting"
-        loldance.publish "/queue/greeting", "hello subscriber?"
+        klomp.unsubscribe "/queue/greeting"
+        klomp.publish "/queue/greeting", "hello subscriber?"
         sleep 1
       end
 
@@ -87,7 +87,7 @@ describe "Loldance acceptance", :acceptance => true do
       end
     end
 
-    Given { loldance }
+    Given { klomp }
 
     Then do
       Thread.abort_on_exception = true
@@ -102,7 +102,7 @@ describe "Loldance acceptance", :acceptance => true do
                 1.upto(msgs_per_thread) do |j|
                   id = i * j
                   print "." if id % 100 == 0
-                  loldance.publish "/queue/greeting", "hello #{id}!", "id" => "greeting-#{id}"
+                  klomp.publish "/queue/greeting", "hello #{id}!", "id" => "greeting-#{id}"
                 end
               end
             end
@@ -116,7 +116,7 @@ describe "Loldance acceptance", :acceptance => true do
 
         ids = []
         subscribe_time = Benchmark.realtime do
-          loldance.subscribe "/queue/greeting" do |msg|
+          klomp.subscribe "/queue/greeting" do |msg|
             id = msg.headers['id'][/(\d+)/, 1].to_i
             print "," if id % 100 == 0
             ids << id

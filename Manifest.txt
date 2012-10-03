@@ -7,10 +7,10 @@ Gemfile.lock
 Manifest.txt
 README.md
 Rakefile
-lib/loldance.rb
-lib/loldance/connection.rb
-lib/loldance/frames.rb
-loldance.gemspec
+lib/klomp.rb
+lib/klomp/connection.rb
+lib/klomp/frames.rb
+klomp.gemspec
 spec/acceptance/acceptance_spec.rb
 spec/frames/auth_error.txt
 spec/frames/connect.txt
@@ -21,8 +21,8 @@ spec/frames/message.txt
 spec/frames/receipt.txt
 spec/frames/subscribe.txt
 spec/frames/unsubscribe.txt
-spec/loldance/connection_spec.rb
-spec/loldance/frames_spec.rb
-spec/loldance_spec.rb
+spec/klomp/connection_spec.rb
+spec/klomp/frames_spec.rb
+spec/klomp_spec.rb
 spec/spec_helper.rb
 spec/support/have_received.rb

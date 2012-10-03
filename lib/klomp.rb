@@ -1,4 +1,4 @@
-class Loldance
+class Klomp
   VERSION = '0.0.1'
 
   class Error < StandardError; end
@@ -41,6 +41,6 @@ class Loldance
   end
 end
 
-require 'loldance/connection'
-require 'loldance/sentinel'
-require 'loldance/frames'
+require 'klomp/connection'
+require 'klomp/sentinel'
+require 'klomp/frames'

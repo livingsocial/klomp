@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe Loldance do
+describe Klomp do
 
   Given(:servers) { ["127.0.0.1:61613", "127.0.0.1:67673"] }
   Given(:connections) { Hash[*servers.map {|s| [s, double("connection #{s}")] }.flatten] }
-  Given { Loldance::Connection.stub!(:new).and_return {|s| connections[s] } }
-  Given(:loldance) { Loldance.new servers }
+  Given { Klomp::Connection.stub!(:new).and_return {|s| connections[s] } }
+  Given(:klomp) { Klomp.new servers }
 
   context "new" do
 
@@ -13,7 +13,7 @@ describe Loldance do
 
       context "when created with no arguments" do
 
-        When(:expect_new) { expect { Loldance.new } }
+        When(:expect_new) { expect { Klomp.new } }
 
         Then { expect_new.to raise_error(ArgumentError) }
 
@@ -21,7 +21,7 @@ describe Loldance do
 
       context "when created with an empty array" do
 
-        When(:expect_new) { expect { Loldance.new([]) } }
+        When(:expect_new) { expect { Klomp.new([]) } }
 
         Then { expect_new.to raise_error(ArgumentError) }
 
@@ -29,13 +29,13 @@ describe Loldance do
 
     end
 
-    context "creates a Loldance::Connection for each server" do
+    context "creates a Klomp::Connection for each server" do
 
-      Given { Loldance::Connection.stub!(:new).and_return double(Loldance::Connection) }
+      Given { Klomp::Connection.stub!(:new).and_return double(Klomp::Connection) }
 
-      When(:loldance) { Loldance.new servers }
+      When(:klomp) { Klomp.new servers }
 
-      Then { servers.each {|s| Loldance::Connection.should have_received(:new).with(s, {}) } }
+      Then { servers.each {|s| Klomp::Connection.should have_received(:new).with(s, {}) } }
 
     end
 
@@ -52,7 +52,7 @@ describe Loldance do
         end
       end
 
-      When { loldance.publish "/queue/greeting", "hello" }
+      When { klomp.publish "/queue/greeting", "hello" }
 
       Then { connections.values.select {|conn| conn.connected? }.length.should == 1 }
 
@@ -72,13 +72,13 @@ describe Loldance do
               conn.stub!(:connected? => true)
             else
               first_exception = true
-              raise Loldance::Error.new
+              raise Klomp::Error.new
             end
           end
         end
       end
 
-      When { loldance.publish "/queue/greeting", "hello" }
+      When { klomp.publish "/queue/greeting", "hello" }
 
       Then { connections.values.select {|conn| conn.connected? }.length.should == 1 }
 
@@ -89,12 +89,12 @@ describe Loldance do
 
     context "raises an exception if all connections failed" do
 
-      Given { connections.values.each {|conn| conn.stub!(:publish).and_raise(Loldance::Error.new) } }
+      Given { connections.values.each {|conn| conn.stub!(:publish).and_raise(Klomp::Error.new) } }
 
-      When(:expect_publish) { expect { loldance.publish "/queue/greeting", "hello" } }
+      When(:expect_publish) { expect { klomp.publish "/queue/greeting", "hello" } }
 
       Then do
-        expect_publish.to raise_error(Loldance::Error)
+        expect_publish.to raise_error(Klomp::Error)
         connections.values.each {|conn| conn.should have_received(:publish) }
       end
 
@@ -108,7 +108,7 @@ describe Loldance do
 
       Given { connections.values.each {|conn| conn.stub!(:subscribe) } }
 
-      When { loldance.subscribe("/queue/greeting") { true } }
+      When { klomp.subscribe("/queue/greeting") { true } }
 
       Then { connections.values.each {|conn| conn.should have_received(:subscribe).with("/queue/greeting", nil) } }
 
@@ -116,11 +116,11 @@ describe Loldance do
 
     context "fails if any subscribe calls fail" do
 
-      Given { connections.values.each {|conn| conn.stub!(:subscribe).and_raise(Loldance::Error.new) } }
+      Given { connections.values.each {|conn| conn.stub!(:subscribe).and_raise(Klomp::Error.new) } }
 
-      When(:expect_publish) { expect { loldance.subscribe("/queue/greeting") { true } } }
+      When(:expect_publish) { expect { klomp.subscribe("/queue/greeting") { true } } }
 
-      Then { expect_publish.to raise_error(Loldance::Error) }
+      Then { expect_publish.to raise_error(Klomp::Error) }
 
     end
 
@@ -132,7 +132,7 @@ describe Loldance do
 
       Given { connections.values.each {|conn| conn.stub!(:unsubscribe) } }
 
-      When { loldance.unsubscribe("/queue/greeting") }
+      When { klomp.unsubscribe("/queue/greeting") }
 
       Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting") } }
 
@@ -140,9 +140,9 @@ describe Loldance do
 
     context "calls unsubscribe on all the servers even if the unsubscribe errs" do
 
-      Given { connections.values.each {|conn| conn.stub!(:unsubscribe).and_raise Loldance::Error.new } }
+      Given { connections.values.each {|conn| conn.stub!(:unsubscribe).and_raise Klomp::Error.new } }
 
-      When { loldance.unsubscribe("/queue/greeting") }
+      When { klomp.unsubscribe("/queue/greeting") }
 
       Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting") } }
 
@@ -156,7 +156,7 @@ describe Loldance do
 
       Given { connections.values.each {|conn| conn.stub!(:disconnect) } }
 
-      When { loldance.disconnect }
+      When { klomp.disconnect }
 
       Then { connections.values.each {|conn| conn.should have_received(:disconnect) } }
 

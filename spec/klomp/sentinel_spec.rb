@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Loldance::Sentinel do
+describe Klomp::Sentinel do
 
   Given(:connection) { double "Connection", connected?:false, reconnect:nil }
-  Given(:sentinel) { Loldance::Sentinel.new connection }
+  Given(:sentinel) { Klomp::Sentinel.new connection }
   Given(:thread) { double Thread }
   Given do
     Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
@@ -32,7 +32,7 @@ describe Loldance::Sentinel do
     Given(:number_of_reconnects) { 7 }
     Given do
       count = 0
-      connection.stub!(:reconnect).and_return { count += 1; raise Loldance::Error if count < number_of_reconnects }
+      connection.stub!(:reconnect).and_return { count += 1; raise Klomp::Error if count < number_of_reconnects }
     end
 
     When do

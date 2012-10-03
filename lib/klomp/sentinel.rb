@@ -1,4 +1,4 @@
-class Loldance
+class Klomp
   class Sentinel
     def initialize(connection)
       @connection = connection

@@ -1,5 +1,5 @@
 require 'simplecov'
-require 'loldance'
+require 'klomp'
 require 'rspec'
 require 'rspec-given'
 

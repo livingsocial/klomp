@@ -1,7 +1,7 @@
 require 'socket'
 require 'uri'
 
-class Loldance
+class Klomp
   FRAME_SEP = "\x00"          # null character is frame separator
   class Connection
 
@@ -36,8 +36,8 @@ class Loldance
     end
 
     def subscribe(queue, subscriber = nil, &block)
-      raise Loldance::Error, "no subscriber provided" unless subscriber || block
-      raise Loldance::Error, "subscriber does not respond to #call" if subscriber && !subscriber.respond_to?(:call)
+      raise Klomp::Error, "no subscriber provided" unless subscriber || block
+      raise Klomp::Error, "subscriber does not respond to #call" if subscriber && !subscriber.respond_to?(:call)
       previous = subscriptions[queue]
       subscriptions[queue] = subscriber || block
       write Frames::Subscribe.new(queue) unless previous

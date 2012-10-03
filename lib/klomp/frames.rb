@@ -1,4 +1,4 @@
-class Loldance
+class Klomp
   class FrameError < Error; end
 
   module Frames
@@ -50,7 +50,7 @@ class Loldance
               frame = line.chomp
               @error = frame == "ERROR"
               if !@error && frame != name
-                raise Loldance::FrameError,
+                raise Klomp::FrameError,
                   "unexpected frame #{frame} (expected #{name}):\n#{data}"
               end
               next

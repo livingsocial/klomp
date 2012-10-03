@@ -3,7 +3,7 @@ require 'hoe'
 
 Hoe.plugin :bundler, :git, :gemspec
 
-Hoe.spec 'loldance' do
+Hoe.spec 'klomp' do
   developer 'Nick Sieger', 'nick.sieger@livingsocial.com'
 
   ### Use markdown for changelog and readme

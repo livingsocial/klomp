@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Loldance::Connection do
+describe Klomp::Connection do
 
   Given(:data)       { frame(:connected) }
   Given(:server)     { "127.0.0.1:61613" }
@@ -14,12 +14,12 @@ describe Loldance::Connection do
     IO.stub!(:select).and_return([[socket], [socket]])
     TCPSocket.stub!(:new).and_return socket
     Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
-    Loldance::Sentinel.stub!(new: double("sentinel"))
+    Klomp::Sentinel.stub!(new: double("sentinel"))
   end
 
   context "new" do
 
-    When { Loldance::Connection.new server, options }
+    When { Klomp::Connection.new server, options }
 
     Then do
       socket.should have_received(:set_encoding).with('UTF-8').ordered
@@ -33,7 +33,7 @@ describe Loldance::Connection do
 
     Given(:server) { "virtual-host:127.0.0.1:61613" }
 
-    When { Loldance::Connection.new server, options }
+    When { Klomp::Connection.new server, options }
 
     Then do
       TCPSocket.should have_received(:new).with("127.0.0.1", 61613)
@@ -47,7 +47,7 @@ describe Loldance::Connection do
     Given(:server) { "stomp://admin:password@127.0.0.1:61613?host=virtual-host" }
     Given(:options) { {} }
 
-    When { Loldance::Connection.new server, options }
+    When { Klomp::Connection.new server, options }
 
     Then do
       TCPSocket.should have_received(:new).with("127.0.0.1", 61613)
@@ -60,14 +60,14 @@ describe Loldance::Connection do
 
     Given(:data) { frame(:auth_error) }
 
-    When(:expect_connect) { expect { Loldance::Connection.new server, options } }
+    When(:expect_connect) { expect { Klomp::Connection.new server, options } }
 
-    Then { expect_connect.to raise_error(Loldance::Error) }
+    Then { expect_connect.to raise_error(Klomp::Error) }
   end
 
   context "publish" do
 
-    Given(:connection) { Loldance::Connection.new server, options }
+    Given(:connection) { Klomp::Connection.new server, options }
 
     When { connection.publish "/queue/greeting", "hello" }
 
@@ -85,7 +85,7 @@ describe Loldance::Connection do
 
   context "subscribe" do
 
-    Given!(:connection) { Loldance::Connection.new server, options }
+    Given!(:connection) { Klomp::Connection.new server, options }
 
     context "writes the subscribe message" do
 
@@ -140,7 +140,7 @@ describe Loldance::Connection do
       end
 
       Then do
-        subscriber.should have_received(:call).with(an_instance_of(Loldance::Frames::Message))
+        subscriber.should have_received(:call).with(an_instance_of(Klomp::Frames::Message))
       end
 
     end
@@ -164,7 +164,7 @@ describe Loldance::Connection do
 
       When(:expect_subscribe) { expect { connection.subscribe("/queue/greeting") } }
 
-      Then { expect_subscribe.to raise_error(Loldance::Error) }
+      Then { expect_subscribe.to raise_error(Klomp::Error) }
 
     end
 
@@ -172,7 +172,7 @@ describe Loldance::Connection do
 
       When(:expect_subscribe) { expect { connection.subscribe("/queue/greeting", double("subscriber")) } }
 
-      Then { expect_subscribe.to raise_error(Loldance::Error) }
+      Then { expect_subscribe.to raise_error(Klomp::Error) }
 
     end
 
@@ -200,7 +200,7 @@ describe Loldance::Connection do
 
   context "unsubscribe" do
 
-    Given(:connection) { Loldance::Connection.new server, options }
+    Given(:connection) { Klomp::Connection.new server, options }
 
     Given { connection.subscriptions["/queue/greeting"] = double "subscribers" }
 
@@ -212,7 +212,7 @@ describe Loldance::Connection do
 
   context "disconnect" do
 
-    Given!(:connection) { Loldance::Connection.new server, options }
+    Given!(:connection) { Klomp::Connection.new server, options }
 
     When { connection.disconnect }
 
@@ -223,7 +223,7 @@ describe Loldance::Connection do
 
     context "makes connection useless (raises error)" do
 
-      Then { expect { connection.publish "/queue/greeting", "hello" }.to raise_error(Loldance::Error) }
+      Then { expect { connection.publish "/queue/greeting", "hello" }.to raise_error(Klomp::Error) }
 
     end
 
@@ -231,7 +231,7 @@ describe Loldance::Connection do
 
   context "socket error on write causes connection to be disconnected" do
 
-    Given!(:connection) { Loldance::Connection.new server, options }
+    Given!(:connection) { Klomp::Connection.new server, options }
     Given do
       socket.stub!(:write).and_raise SystemCallError.new("some socket error")
     end
@@ -243,11 +243,11 @@ describe Loldance::Connection do
       connection.should_not be_connected
     end
 
-    context "and subsequent calls raise Loldance::Error" do
+    context "and subsequent calls raise Klomp::Error" do
 
       Then do
         expect_publish.to raise_error(SystemCallError)
-        expect_publish.to raise_error(Loldance::Error)
+        expect_publish.to raise_error(Klomp::Error)
       end
 
     end
@@ -256,7 +256,7 @@ describe Loldance::Connection do
 
       Then do
         expect_publish.to raise_error(SystemCallError)
-        Loldance::Sentinel.should have_received(:new).with(connection)
+        Klomp::Sentinel.should have_received(:new).with(connection)
       end
 
     end
@@ -265,7 +265,7 @@ describe Loldance::Connection do
 
   context "socket error on read causes connection to be disconnected" do
 
-    Given!(:connection) { Loldance::Connection.new server, options }
+    Given!(:connection) { Klomp::Connection.new server, options }
 
     Given do
       thread.stub!(:raise).and_return {|e| raise e }
@@ -283,7 +283,7 @@ describe Loldance::Connection do
 
   context "reconnect" do
 
-    Given!(:connection) { Loldance::Connection.new server, options }
+    Given!(:connection) { Klomp::Connection.new server, options }
 
     context "creates new socket" do
 
