@@ -1,7 +1,7 @@
 require 'bundler/setup'
 require 'hoe'
 
-Hoe.plugin :bundler, :git, :gemspec
+Hoe.plugin :bundler, :git, :gemspec, :gemcutter
 
 Hoe.spec 'klomp' do
   developer 'Nick Sieger', 'nick.sieger@livingsocial.com'
