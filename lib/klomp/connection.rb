@@ -91,7 +91,7 @@ class Klomp
     rescue Error
       raise
     rescue
-      trash_socket_and_launch_sentinel
+      go_offline
       raise
     end
 
@@ -102,7 +102,7 @@ class Klomp
     rescue Error
       raise
     rescue
-      trash_socket_and_launch_sentinel
+      go_offline
       raise
     end
 
@@ -122,7 +122,12 @@ class Klomp
       @closing = true
     end
 
-    def trash_socket_and_launch_sentinel
+    def go_offline
+      if logger
+        msg = "offline server=#{options['server'].join(':')}"
+        msg << " exception=#{$!.class.name} message=#{$!.message.inspect}" if $!
+        logger.warn msg
+      end
       @socket.close rescue nil
       @socket = nil
       Sentinel.new(self)
