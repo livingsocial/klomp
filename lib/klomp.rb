@@ -24,7 +24,7 @@ class Klomp
   end
 
   def subscribe(queue, subscriber = nil, &block)
-    connections.each {|conn| conn.subscribe(queue, subscriber, &block) }
+    connections.map {|conn| conn.subscribe(queue, subscriber, &block) }
   end
 
   def unsubscribe(queue)

@@ -113,11 +113,17 @@ describe Klomp do
 
     context "calls subscribe on all of the servers" do
 
-      Given { connections.values.each {|conn| conn.stub!(:subscribe) } }
+      Given { connections.values.each {|conn| conn.stub!(subscribe: 42) } }
 
-      When { klomp.subscribe("/queue/greeting") { true } }
+      When(:result) { klomp.subscribe("/queue/greeting") { true } }
 
       Then { connections.values.each {|conn| conn.should have_received(:subscribe).with("/queue/greeting", nil) } }
+
+      context "and returns the results of all Connection#subscribe as an array" do
+
+        Then { result.should == Array.new(connections.size, 42) }
+
+      end
 
     end
 
