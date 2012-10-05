@@ -42,8 +42,9 @@ class Klomp
   end
 
   def disconnect
-    connections.each {|conn| conn.disconnect }
-    @connections = []
+    connections.map {|conn| conn.disconnect }.tap do
+      @connections = []
+    end
   end
 end
 

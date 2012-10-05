@@ -197,11 +197,17 @@ describe Klomp do
 
     context "disconnects all the servers" do
 
-      Given { connections.values.each {|conn| conn.stub!(:disconnect) } }
+      Given { connections.values.each {|conn| conn.stub!(disconnect: 42) } }
 
-      When { klomp.disconnect }
+      When(:result) { klomp.disconnect }
 
       Then { connections.values.each {|conn| conn.should have_received(:disconnect) } }
+
+      context "and returns the results of all Connection#disconnect as an array" do
+
+        Then { result.should == Array.new(connections.size, 42) }
+
+      end
 
     end
 
