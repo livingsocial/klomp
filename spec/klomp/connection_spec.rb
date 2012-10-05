@@ -205,14 +205,23 @@ describe Klomp::Connection do
   context "unsubscribe" do
 
     Given(:connection) { Klomp::Connection.new server, options }
+    Given(:arg) { "/queue/greeting" }
 
     Given { connection.subscriptions["/queue/greeting"] = double "subscribers" }
 
-    When(:result) { connection.unsubscribe "/queue/greeting" }
+    When(:result) { connection.unsubscribe arg }
 
     Then { socket.should have_received(:write).with(frame(:unsubscribe)) }
 
     Then { result.should be_instance_of(Klomp::Frames::Unsubscribe) }
+
+    context "can accept Subscribe frame" do
+
+      Given(:arg) { Klomp::Frames::Subscribe.new "/queue/greeting" }
+
+      Then { socket.should have_received(:write).with(frame(:unsubscribe)) }
+
+    end
   end
 
   context "disconnect" do

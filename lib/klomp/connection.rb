@@ -51,6 +51,7 @@ class Klomp
     end
 
     def unsubscribe(queue)
+      queue = queue.headers['destination'] if Frames::Subscribe === queue
       write Frames::Unsubscribe.new(queue) if subscriptions.delete queue
     end
 
