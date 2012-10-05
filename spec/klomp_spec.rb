@@ -43,21 +43,25 @@ describe Klomp do
 
   context "publish" do
 
+    Given(:frame) { double "send frame" }
+
     context "calls publish on one of the connections" do
 
       Given do
         connections.values.each do |conn|
           conn.stub!(:connected? => false)
-          conn.stub!(:publish).and_return { conn.stub!(:connected? => true) }
+          conn.stub!(:publish).and_return { conn.stub!(:connected? => true); frame }
         end
       end
 
-      When { klomp.publish "/queue/greeting", "hello" }
+      When(:result) { klomp.publish "/queue/greeting", "hello" }
 
       Then { connections.values.select {|conn| conn.connected? }.length.should == 1 }
 
       Then { connections.values.detect {|conn| conn.connected? }.
         should have_received(:publish).with("/queue/greeting", "hello", {}) }
+
+      Then { result.should == frame }
 
     end
 
@@ -70,6 +74,7 @@ describe Klomp do
           conn.stub!(:publish).and_return do
             if first_exception
               conn.stub!(:connected? => true)
+              frame
             else
               first_exception = true
               raise Klomp::Error.new
@@ -78,12 +83,14 @@ describe Klomp do
         end
       end
 
-      When { klomp.publish "/queue/greeting", "hello" }
+      When(:result) { klomp.publish "/queue/greeting", "hello" }
 
       Then { connections.values.select {|conn| conn.connected? }.length.should == 1 }
 
       Then { connections.values.detect {|conn| conn.connected? }.
         should have_received(:publish).with("/queue/greeting", "hello", {}) }
+
+      Then { result.should == frame }
 
     end
 
