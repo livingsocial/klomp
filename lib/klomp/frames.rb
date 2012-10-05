@@ -89,6 +89,7 @@ class Klomp
     end
 
     class Subscribe < Frame
+      attr_accessor :previous_subscriber
       def initialize(queue)
         headers['id'] = queue
         headers['destination'] = queue

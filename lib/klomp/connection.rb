@@ -40,9 +40,14 @@ class Klomp
       raise Klomp::Error, "subscriber does not respond to #call" if subscriber && !subscriber.respond_to?(:call)
       previous = subscriptions[queue]
       subscriptions[queue] = subscriber || block
-      write Frames::Subscribe.new(queue) unless previous
+      frame = Frames::Subscribe.new(queue)
+      if previous
+        frame.previous_subscriber = previous
+      else
+        write frame
+      end
       start_subscriber_thread
-      previous
+      frame
     end
 
     def unsubscribe(queue)
@@ -55,9 +60,11 @@ class Klomp
     def disconnect
       close!
       stop_subscriber_thread
-      write Frames::Disconnect.new rescue nil
+      frame = Frames::Disconnect.new
+      write frame rescue nil
       @socket.close rescue nil
       @socket = nil
+      frame
     end
 
     def reconnect
@@ -88,6 +95,7 @@ class Klomp
 
       @socket.write frame.to_s
       log_frame frame if logger
+      frame
     rescue Error
       raise
     rescue

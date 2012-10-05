@@ -69,9 +69,11 @@ describe Klomp::Connection do
 
     Given(:connection) { Klomp::Connection.new server, options }
 
-    When { connection.publish "/queue/greeting", "hello" }
+    When(:result) { connection.publish "/queue/greeting", "hello" }
 
     Then { socket.should have_received(:write).with(frame(:greeting)) }
+
+    Then { result.should be_instance_of(Klomp::Frames::Send) }
 
     context "logs when logger level is debug" do
 
@@ -89,9 +91,11 @@ describe Klomp::Connection do
 
     context "writes the subscribe message" do
 
-      When { connection.subscribe "/queue/greeting", subscriber }
+      When(:result) { connection.subscribe "/queue/greeting", subscriber }
 
       Then { socket.should have_received(:write).with(frame(:subscribe)) }
+
+      Then { result.should be_instance_of(Klomp::Frames::Subscribe) }
 
       context "and logs when logger level is debug" do
 
@@ -204,22 +208,25 @@ describe Klomp::Connection do
 
     Given { connection.subscriptions["/queue/greeting"] = double "subscribers" }
 
-    When { connection.unsubscribe "/queue/greeting" }
+    When(:result) { connection.unsubscribe "/queue/greeting" }
 
     Then { socket.should have_received(:write).with(frame(:unsubscribe)) }
 
+    Then { result.should be_instance_of(Klomp::Frames::Unsubscribe) }
   end
 
   context "disconnect" do
 
     Given!(:connection) { Klomp::Connection.new server, options }
 
-    When { connection.disconnect }
+    When(:result) { connection.disconnect }
 
     Then do
       socket.should have_received(:write).with(frame(:disconnect))
       socket.should have_received(:close)
     end
+
+    Then { result.should be_instance_of(Klomp::Frames::Disconnect) }
 
     context "makes connection useless (raises error)" do
 
