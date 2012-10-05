@@ -1,6 +1,12 @@
 Klomp Changes
 --------------------------------------------------------------------------------
 
+1.0.1 (2012/10/5)
+================================================================================
+
+- Make publish, subscribe, and unsubscribe methods behave like Klomp 0.0.x where
+  the return value is the frame object(s) that was created by the operation.
+
 1.0.0 (2012/10/3)
 ================================================================================
 
