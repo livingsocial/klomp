@@ -143,11 +143,17 @@ describe Klomp do
 
     context "calls unsubscribe on all the servers" do
 
-      Given { connections.values.each {|conn| conn.stub!(:unsubscribe) } }
+      Given { connections.values.each {|conn| conn.stub!(unsubscribe: 42) } }
 
-      When { klomp.unsubscribe("/queue/greeting") }
+      When(:result) { klomp.unsubscribe("/queue/greeting") }
 
       Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting") } }
+
+      context "and returns the results of all Connection#unsubscribe as an array" do
+
+        Then { result.should == Array.new(connections.size, 42) }
+
+      end
 
     end
 
@@ -158,6 +164,30 @@ describe Klomp do
       When { klomp.unsubscribe("/queue/greeting") }
 
       Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting") } }
+
+    end
+
+    context "with an array" do
+
+      context "of length matching the number of connections" do
+
+        Given(:arg) { Array.new(connections.size, 42) }
+
+        Given { connections.values.each {|conn| conn.stub!(:unsubscribe) } }
+
+        When { klomp.unsubscribe arg }
+
+        Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with(42) } }
+
+      end
+
+      context "of mismatched length" do
+
+        When(:expect_unsubscribe) { expect { klomp.unsubscribe([]) } }
+
+        Then { expect_unsubscribe.to raise_error(ArgumentError) }
+
+      end
 
     end
 

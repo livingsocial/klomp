@@ -28,7 +28,13 @@ class Klomp
   end
 
   def unsubscribe(queue)
-    connections.each {|conn| conn.unsubscribe(queue) rescue nil }
+    if Array === queue
+      raise ArgumentError,
+        "wrong size array for #{connections.size} (#{queue.size})" unless connections.size == queue.size
+      connections.zip(queue).map {|conn,arg| conn.unsubscribe arg rescue nil }
+    else
+      connections.map {|conn| conn.unsubscribe(queue) rescue nil }
+    end
   end
 
   def connected?
