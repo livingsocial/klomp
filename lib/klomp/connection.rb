@@ -99,19 +99,19 @@ class Klomp
       frame
     rescue Error
       raise
-    rescue
-      go_offline
+    rescue => e
+      go_offline e
       raise
     end
 
     def read(type, timeout = nil)
       rs, = IO.select([@socket], nil, nil, timeout)
       raise Error, "connection unavailable for read" unless rs && !rs.empty?
-      type.new @socket.gets(FRAME_SEP)
+      type.new(@socket.gets(FRAME_SEP)).tap {|frame| log_frame frame if logger }
     rescue Error
       raise
-    rescue
-      go_offline
+    rescue => e
+      go_offline e
       raise
     end
 
@@ -122,8 +122,8 @@ class Klomp
       logger.debug "frame=#{frame.name} #{frame.headers.map{|k,v| k + '=' + v }.join(' ')} body=#{body}"
     end
 
-    def log_exception(ex, level = :error)
-      logger.send level, "exception=#{ex.class.name} message=#{ex.message.inspect} backtrace[0]=#{ex.backtrace[0]} backtrace[1]=#{ex.backtrace[1]}"
+    def log_exception(ex, level = :error, msg_start = '')
+      logger.send level, "#{msg_start}exception=#{ex.class.name} message=#{ex.message.inspect} backtrace[0]=#{ex.backtrace[0]} backtrace[1]=#{ex.backtrace[1]}"
       logger.debug "exception=#{ex.class.name} full_backtrace=" + ex.backtrace.join("\n")
     end
 
@@ -131,12 +131,8 @@ class Klomp
       @closing = true
     end
 
-    def go_offline
-      if logger
-        msg = "offline server=#{options['server'].join(':')}"
-        msg << " exception=#{$!.class.name} message=#{$!.message.inspect}" if $!
-        logger.warn msg
-      end
+    def go_offline(ex)
+      log_exception(ex, :warn, "offline server=#{options['server'].join(':')} ") if logger
       @socket.close rescue nil
       @socket = nil
       Sentinel.new(self)
