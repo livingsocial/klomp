@@ -28,6 +28,7 @@ class Klomp
       @options['host']   ||= host
       @subscriptions = {}
       @logger = options['logger']
+      @select_timeout = options['select_timeout'] || 0.1
       connect
     end
 
@@ -82,7 +83,7 @@ class Klomp
       @socket  = TCPSocket.new *options['server']
       @socket.set_encoding 'UTF-8'
       write Frames::Connect.new(options)
-      frame = read Frames::Connected, 0.1
+      frame = read Frames::Connected, @select_timeout
       log_frame frame if logger
       raise Error, frame.headers['message'] if frame.error?
     end
@@ -91,7 +92,7 @@ class Klomp
       raise Error, "connection closed" if closed?
       raise Error, "disconnected"      unless connected?
 
-      rs, ws, = IO.select(nil, [@socket], nil, 0.1)
+      rs, ws, = IO.select(nil, [@socket], nil, @select_timeout)
       raise Error, "connection unavailable for write" unless ws && !ws.empty?
 
       @socket.write frame.to_s
