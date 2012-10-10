@@ -1,6 +1,14 @@
 Klomp Changes
 --------------------------------------------------------------------------------
 
+1.0.2 (2012/10/10)
+================================================================================
+
+- Frames now respond to `#[]` and `#[]=` (for header access) and `#body=` (for
+  setting body after construction)
+- Configurable foreground IO.select timeout through `options['select_timeout']`
+- Add logging of read frames and exceptions when going offline
+
 1.0.1 (2012/10/5)
 ================================================================================
 
