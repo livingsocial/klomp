@@ -9,12 +9,13 @@ describe Klomp::Connection do
   Given(:logger)     { double("Logger", error:nil, warn:nil, info:nil, debug:nil).as_null_object }
   Given(:subscriber) { double "subscriber", call:nil }
   Given(:thread)     { double Thread }
+  Given(:sentinel)   { double Klomp::Sentinel, alive?:true }
 
   Given do
     IO.stub!(:select).and_return([[socket], [socket]])
     TCPSocket.stub!(:new).and_return socket
     Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
-    Klomp::Sentinel.stub!(new: double("sentinel"))
+    Klomp::Sentinel.stub!(new: sentinel)
   end
 
   context "new" do
@@ -273,6 +274,16 @@ describe Klomp::Connection do
       Then do
         expect_publish.to raise_error(SystemCallError)
         Klomp::Sentinel.should have_received(:new).with(connection)
+      end
+
+      context "only once" do
+
+        Then do
+          expect_publish.to raise_error(SystemCallError)
+          connection.send(:go_offline, begin; raise "error"; rescue; $!; end)
+          Klomp::Sentinel.should have_received(:new).with(connection).once
+        end
+
       end
 
     end

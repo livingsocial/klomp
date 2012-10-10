@@ -76,6 +76,7 @@ class Klomp
       subs = subscriptions.dup
       subscriptions.clear
       subs.each {|queue, subscriber| subscribe(queue, subscriber) }
+      @sentinel = nil
     end
 
     private
@@ -134,9 +135,10 @@ class Klomp
 
     def go_offline(ex)
       log_exception(ex, :warn, "offline server=#{options['server'].join(':')} ") if logger
+      return if @sentinel && @sentinel.alive?
       @socket.close rescue nil
       @socket = nil
-      Sentinel.new(self)
+      @sentinel = Sentinel.new(self)
       stop_subscriber_thread
     end
 
