@@ -6,7 +6,6 @@ describe Klomp::Frames do
 
   context "CONNECT" do
 
-
     When(:connect) { Klomp::Frames::Connect.new(options).to_s }
 
     Then { connect.should == frame(:connect) }
@@ -18,6 +17,16 @@ describe Klomp::Frames do
     When(:connected) { Klomp::Frames::Connected.new frame(:connected) }
 
     Then { connected.headers['version'].should == "1.1" }
+
+  end
+
+  context "stringifies all header keys and values" do
+
+    Given(:headers) { { timeout:42 } }
+
+    When(:send_frame) { Klomp::Frames::Send.new("/queue/q", "", headers) }
+
+    Then { send_frame.to_s.should =~ /timeout:42/ }
 
   end
 
