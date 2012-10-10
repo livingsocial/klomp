@@ -3,17 +3,14 @@ class Klomp
 
   module Frames
     class Frame
-      def name
-        @name ||= self.class.name.split('::').last.upcase
-      end
+      def name; @name ||= self.class.name.split('::').last.upcase; end
 
-      def headers
-        @headers ||= {}
-      end
+      def headers;         @headers ||= {};       end
+      def [](key);          headers[key];         end
+      def []=(key, value);  headers[key] = value; end
 
-      def body
-        @body ||= ""
-      end
+      def body; @body ||= ""; end
+      def body=(b); @body = b; end
 
       def to_s
         "#{name}\n#{dump_headers}\n#{@body}#{FRAME_SEP}"
