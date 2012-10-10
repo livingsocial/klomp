@@ -120,7 +120,7 @@ class Klomp
       return unless logger.debug?
       body = frame.body
       body = body.lines.first.chomp + '...' if body =~ /\n/
-      logger.debug "frame=#{frame.name} #{frame.headers.map{|k,v| k + '=' + v }.join(' ')} body=#{body}"
+      logger.debug "frame=#{frame.name} #{frame.headers.map{|k,v| k.to_s + '=' + v.to_s.inspect }.join(' ')} body=#{body}"
     end
 
     def log_exception(ex, level = :error, msg_start = '')
