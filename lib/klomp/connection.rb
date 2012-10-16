@@ -134,8 +134,8 @@ class Klomp
     end
 
     def go_offline(ex)
+      return if @closing || (@sentinel && @sentinel.alive?)
       log_exception(ex, :warn, "offline server=#{options['server'].join(':')} ") if logger
-      return if @sentinel && @sentinel.alive?
       @socket.close rescue nil
       @socket = nil
       @sentinel = Sentinel.new(self)
@@ -156,7 +156,7 @@ class Klomp
           rescue INTERRUPT
             break
           rescue => e
-            log_exception(e, :warn) if logger
+            log_exception(e, :warn) if logger && !@closing
           end
           break if @closing
         end

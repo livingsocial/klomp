@@ -161,8 +161,6 @@ describe Klomp::Connection do
 
       Then { subscriber.should_not have_received(:call) }
 
-      Then { logger.should have_received(:warn) }
-
     end
 
     context "fails if neither a subscriber nor a block is given" do
