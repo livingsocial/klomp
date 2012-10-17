@@ -10,19 +10,31 @@ describe "Klomp reconnect logic", :acceptance => true do
   Given(:options) { Hash[*%w(login passcode).zip(credentials).flatten] }
 
   it "reconnects after a server goes down" do
+    # Publish and receive a message
     klomp.publish "/queue/greeting", "hello"
-    drain("/queue/greeting").should_not be_empty
+    incoming = []
+    klomp.subscribe "/queue/greeting" do |msg|
+      incoming << msg
+    end
+    sleep 2
+    incoming.should_not be_empty
 
+    # Server disappears
     stop_proxy
-
     expect { klomp.publish "/queue/greeting", "hello" }.to raise_error
     klomp.should_not be_connected
 
+    # Server reappears
     start_proxy
-
     klomp.should be_connected
+
+    # Subscription is re-established
+    incoming = []
     klomp.publish "/queue/greeting", "hello"
-    drain("/queue/greeting").should_not be_empty
+    sleep 2
+    incoming.should_not be_empty
+
+    klomp.unsubscribe "/queue/greeting"
   end
 
   before { start_proxy }
@@ -51,14 +63,4 @@ describe "Klomp reconnect logic", :acceptance => true do
     end
   end
 
-  def drain(q)
-    incoming = []
-    klomp.subscribe q do |msg|
-      incoming << msg
-    end
-    sleep 2
-    incoming
-  ensure
-    klomp.unsubscribe q
-  end
 end
