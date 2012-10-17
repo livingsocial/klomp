@@ -10,6 +10,8 @@ Hoe.spec 'klomp' do
   self.history_file = 'CHANGELOG.md'
   self.readme_file  = 'README.md'
 
+  self.clean_globs << 'spec/reports'
+
   ### dependencies!
   self.extra_dev_deps << [ 'hoe-bundler',  '~> 1.1.0'  ]
   self.extra_dev_deps << [ 'hoe-gemspec',  '~> 1.0.0'  ]
