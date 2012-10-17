@@ -349,6 +349,28 @@ describe Klomp::Connection do
 
     end
 
+    context "ensures subscriptions don't get lost if re-subscribe calls fail" do
+
+      Given do
+        connection.subscribe "/queue/greeting", subscriber
+        connection.subscribe "/queue/hello", subscriber
+        thread.stub!(:raise)
+        connection.disconnect
+        socket.messages_received.clear
+        socket.stub!(:write).and_return do |data|
+          raise "some error" if data =~ /SUBSCRIBE/
+        end
+      end
+
+      When(:expect_reconnect) { expect { connection.reconnect } }
+
+      Then do
+        expect_reconnect.to raise_error
+        connection.subscriptions.size.should == 2
+      end
+
+    end
+
   end
 
 end

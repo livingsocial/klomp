@@ -4,6 +4,7 @@ Klomp Changes
 1.0.5 (2012/10/17)
 ================================================================================
 
+- Ensure subscriptions don't get lost if re-subscribe calls fail
 - Add a test of the reconnect logic using em-proxy
 - Rescue all errors while parsing server frames and treat them like foreign
   (server/IO/socket) errors

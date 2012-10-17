@@ -77,6 +77,8 @@ class Klomp
       subscriptions.clear
       subs.each {|queue, subscriber| subscribe(queue, subscriber) }
       @sentinel = nil
+    ensure
+      @subscriptions = subs if subs && subs.size != @subscriptions.size
     end
 
     private
