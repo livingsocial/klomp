@@ -4,11 +4,7 @@ require 'open-uri'
 
 describe "Klomp acceptance", :acceptance => true do
 
-  Given(:server) { "127.0.0.1:61613" }
-  Given(:credentials) { %w(admin password) }
-  Given(:options) { Hash[*%w(login passcode).zip(credentials).flatten] }
-  Given(:clients) { [] }
-  Given(:klomp) { Klomp.new(server, options).tap {|l| clients << l } }
+  include_context :acceptance_client
 
   context "connect" do
 
@@ -50,7 +46,6 @@ describe "Klomp acceptance", :acceptance => true do
       subscriber.should have_received(:call).with(an_instance_of(Klomp::Frames::Message))
       subscriber.message.body.should == "hello subscriber!"
     end
-
 
     context "and unsubscribe" do
 
@@ -134,8 +129,6 @@ describe "Klomp acceptance", :acceptance => true do
       "--------------------------------------------------------------------------------\n"
     end
   end
-
-  after { clients.each(&:disconnect) }
 
   def apollo_mgmt_url(path)
     "http://localhost:61680#{path}"
