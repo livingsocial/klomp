@@ -58,8 +58,8 @@ describe "Klomp reconnect logic", :acceptance => true do
   def stop_proxy
     if @pid
       Process.kill "TERM", @pid
+      Process.waitpid @pid
       @pid = nil
-      sleep 1
     end
   end
 
