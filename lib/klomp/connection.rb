@@ -28,7 +28,7 @@ class Klomp
       @options['host']   ||= host
       @subscriptions = {}
       @logger = options['logger']
-      @select_timeout = options['select_timeout'] || 0.1
+      @select_timeout = options['select_timeout'] || 0.5
       connect
     end
 
