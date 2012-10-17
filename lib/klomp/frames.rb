@@ -1,5 +1,5 @@
 class Klomp
-  class FrameError < Error; end
+  class FrameError < ::StandardError; end
 
   module Frames
     class Frame
@@ -35,6 +35,7 @@ class Klomp
       private
       def parse(data)
         headers, body = data.split("\n\n")
+        raise Klomp::FrameError, "malformed frame from server" unless headers && body
         [parse_headers(headers), body.chomp(FRAME_SEP)]
       end
 
