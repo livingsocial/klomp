@@ -35,8 +35,11 @@ class Klomp
       private
       def parse(data)
         headers, body = data.split("\n\n")
-        raise Klomp::FrameError, "malformed frame from server" unless headers && body
         [parse_headers(headers), body.chomp(FRAME_SEP)]
+      rescue FrameError
+        raise
+      rescue
+        raise FrameError, "malformed frame from server"
       end
 
       def parse_headers(data)
@@ -48,7 +51,7 @@ class Klomp
               frame = line.chomp
               @error = frame == "ERROR"
               if !@error && frame != name
-                raise Klomp::FrameError,
+                raise FrameError,
                   "unexpected frame #{frame} (expected #{name}):\n#{data}"
               end
               next
