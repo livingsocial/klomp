@@ -1,5 +1,5 @@
 class Klomp
-  VERSION = '1.0.4'
+  VERSION = '1.0.5'
 
   class Error < StandardError; end
 

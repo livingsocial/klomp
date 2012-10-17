@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "klomp"
-  s.version = "1.0.4.20121017141813"
+  s.version = "1.0.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nick Sieger"]

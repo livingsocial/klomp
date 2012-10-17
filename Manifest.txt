@@ -12,6 +12,7 @@ lib/klomp/connection.rb
 lib/klomp/frames.rb
 lib/klomp/sentinel.rb
 spec/acceptance/acceptance_spec.rb
+spec/acceptance/reconnect_spec.rb
 spec/frames/auth_error.txt
 spec/frames/connect.txt
 spec/frames/connect_vhost.txt
@@ -29,3 +30,4 @@ spec/klomp/sentinel_spec.rb
 spec/klomp_spec.rb
 spec/spec_helper.rb
 spec/support/have_received.rb
+spec/support/shared_contexts.rb

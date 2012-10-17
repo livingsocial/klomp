@@ -1,6 +1,15 @@
 Klomp Changes
 --------------------------------------------------------------------------------
 
+1.0.5 (2012/10/17)
+================================================================================
+
+- Add a test of the reconnect logic using em-proxy
+- Rescue all errors while parsing server frames and treat them like foreign
+  (server/IO/socket) errors
+- Bump up default select timeout to avoid niggling read errors on connect
+- Don't log exceptions if we're already offline or closing
+
 1.0.4 (2012/10/10)
 ================================================================================
 
