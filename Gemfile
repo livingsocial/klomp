@@ -14,6 +14,7 @@ gem "ZenTest", "~>4.8.0", :group => [:development, :test]
 gem "rspec-given", "~>1.0", :group => [:development, :test]
 gem "simplecov", "~>0.6.0", :group => [:development, :test]
 gem "em-proxy", "~>0.1.0", :group => [:development, :test]
+gem "ci_reporter", "~>1.7.0", :group => [:development, :test]
 gem "hoe", "~>3.0", :group => [:development, :test]
 
 # vim: syntax=ruby
