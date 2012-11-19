@@ -2,7 +2,11 @@ class Klomp
   class Sentinel
     def initialize(connection)
       @connection = connection
-      Thread.new { run } unless @connection.connected?
+      @thread = Thread.new { run } unless @connection.connected?
+    end
+
+    def alive?
+      @thread && @thread.alive?
     end
 
     def run
