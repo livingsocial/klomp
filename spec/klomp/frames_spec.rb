@@ -22,7 +22,7 @@ describe Klomp::Frames do
 
   context "stringifies all header keys and values" do
 
-    Given(:headers) { { timeout:42 } }
+    Given(:headers) { { :timeout => 42 } }
 
     When(:send_frame) { Klomp::Frames::Send.new("/queue/q", "", headers) }
 

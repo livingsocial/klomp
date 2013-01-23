@@ -84,7 +84,7 @@ class Klomp
     private
     def connect
       @socket  = TCPSocket.new *options['server']
-      @socket.set_encoding 'UTF-8'
+      @socket.set_encoding 'UTF-8' if @socket.respond_to?(:set_encoding)
       write Frames::Connect.new(options)
       frame = read Frames::Connected, @select_timeout
       log_frame frame if logger

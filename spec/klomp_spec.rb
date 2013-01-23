@@ -4,7 +4,7 @@ describe Klomp do
 
   Given(:servers) { ["127.0.0.1:61613", "127.0.0.1:67673"] }
   Given(:connections) { Hash[*servers.map {|s| [s, double("connection #{s}")] }.flatten] }
-  Given { Klomp::Connection.stub!(:new).and_return {|s| connections[s] } }
+  Given { Klomp::Connection.stub!(:new).and_return {|s, _| connections[s] } }
   Given(:klomp) { Klomp.new servers }
 
   context "new" do
@@ -113,7 +113,7 @@ describe Klomp do
 
     context "calls subscribe on all of the servers" do
 
-      Given { connections.values.each {|conn| conn.stub!(subscribe: 42) } }
+      Given { connections.values.each {|conn| conn.stub!(:subscribe => 42) } }
 
       When(:result) { klomp.subscribe("/queue/greeting") { true } }
 
@@ -143,7 +143,7 @@ describe Klomp do
 
     context "calls unsubscribe on all the servers" do
 
-      Given { connections.values.each {|conn| conn.stub!(unsubscribe: 42) } }
+      Given { connections.values.each {|conn| conn.stub!(:unsubscribe => 42) } }
 
       When(:result) { klomp.unsubscribe("/queue/greeting") }
 
@@ -197,7 +197,7 @@ describe Klomp do
 
     context "disconnects all the servers" do
 
-      Given { connections.values.each {|conn| conn.stub!(disconnect: 42) } }
+      Given { connections.values.each {|conn| conn.stub!(:disconnect => 42) } }
 
       When(:result) { klomp.disconnect }
 

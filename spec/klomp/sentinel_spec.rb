@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Klomp::Sentinel do
 
-  Given(:connection) { double "Connection", connected?:false, reconnect:nil }
+  Given(:connection) { double "Connection", :connected? => false, :reconnect => nil }
   Given(:sentinel) { Klomp::Sentinel.new connection }
   Given(:thread) { double Thread }
   Given do
@@ -11,7 +11,7 @@ describe Klomp::Sentinel do
 
   context "does nothing if the connection is already connected" do
 
-    Given { connection.stub!(connected?: true) }
+    Given { connection.stub!(:connected? => true) }
 
     When { sentinel }
 

@@ -4,18 +4,24 @@ describe Klomp::Connection do
 
   Given(:data)       { frame(:connected) }
   Given(:server)     { "127.0.0.1:61613" }
-  Given(:options)    { { "login" => "admin", "passcode" => "password", "logger" => logger } }
-  Given(:socket)     { double(TCPSocket, gets:data, write:nil, set_encoding:nil, close:nil) }
-  Given(:logger)     { double("Logger", error:nil, warn:nil, info:nil, debug:nil).as_null_object }
-  Given(:subscriber) { double "subscriber", call:nil }
+  Given(:socket)     { double(TCPSocket, :gets => data, :write => nil, :set_encoding => nil, :close => nil) }
+  Given(:logger)     { double("Logger", :error => nil, :warn => nil, :info => nil, :debug => nil).as_null_object }
+  Given(:subscriber) { double "subscriber", :call => nil }
   Given(:thread)     { double Thread }
-  Given(:sentinel)   { double Klomp::Sentinel, alive?:true }
+  Given(:sentinel)   { double Klomp::Sentinel, :alive? => true }
+  Given(:options)    {
+    hsh = ActiveSupport::OrderedHash.new
+    hsh['login']    = 'admin'
+    hsh['passcode'] = 'password'
+    hsh['logger']   = logger
+    hsh
+  }
 
   Given do
     IO.stub!(:select).and_return([[socket], [socket]])
     TCPSocket.stub!(:new).and_return socket
     Thread.stub!(:new).and_return {|*args,&blk| thread.stub!(:block => blk); thread }
-    Klomp::Sentinel.stub!(new: sentinel)
+    Klomp::Sentinel.stub!(:new => sentinel)
   end
 
   context "new" do
@@ -78,7 +84,7 @@ describe Klomp::Connection do
 
     context "logs when logger level is debug" do
 
-      Given(:logger) { double("Logger").as_null_object.tap {|l| l.stub!(debug?: true) } }
+      Given(:logger) { double("Logger").as_null_object.tap {|l| l.stub!(:debug? => true) } }
 
       Then { logger.should have_received(:debug) }
 
@@ -100,7 +106,7 @@ describe Klomp::Connection do
 
       context "and logs when logger level is debug" do
 
-        Given(:logger) { double("Logger").as_null_object.tap {|l| l.stub!(debug?: true) } }
+        Given(:logger) { double("Logger").as_null_object.tap {|l| l.stub!(:debug? => true) } }
 
         Then { logger.should have_received(:debug) }
 
@@ -112,7 +118,7 @@ describe Klomp::Connection do
 
       When do
         connection.subscribe "/queue/greeting", subscriber
-        connection.subscribe "/queue/greeting", double("another subscriber that replaces the first", call:nil)
+        connection.subscribe "/queue/greeting", double("another subscriber that replaces the first", :call => nil)
       end
 
       Then { socket.should have_received(:write).with(frame(:subscribe)).once }
@@ -225,7 +231,7 @@ describe Klomp::Connection do
 
   context "disconnect" do
 
-    Given!(:connection) { Klomp::Connection.new server, options }
+    Given!(:connection) { Klomp::Connection.new server, options}
 
     When(:result) { connection.disconnect }
 
@@ -293,7 +299,7 @@ describe Klomp::Connection do
     Given!(:connection) { Klomp::Connection.new server, options }
 
     Given do
-      thread.stub!(:raise).and_return {|e| raise e }
+      thread.stub!(:raise).and_return {|e, _| raise e }
       socket.stub!(:gets).and_raise SystemCallError.new("some socket error")
     end
 
