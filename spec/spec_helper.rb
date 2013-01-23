@@ -1,7 +1,8 @@
-require 'simplecov'
+require 'simplecov' if RUBY_VERSION >= '1.9'
 require 'klomp'
 require 'rspec'
 require 'rspec-given'
+require 'active_support'
 
 Dir[File.expand_path('../support/', __FILE__) + '/*.rb'].each {|f| require f }
 
@@ -30,6 +31,12 @@ RSpec.configure do |config|
     config.filter_run :performance
   else
     config.filter_run_excluding :performance
+  end
+
+  config.before :each do
+    Klomp::Frames::Frame.any_instance.stub(:new_headers) do
+      ActiveSupport::OrderedHash.new
+    end
   end
 
   config.include Frames

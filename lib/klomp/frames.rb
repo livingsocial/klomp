@@ -5,9 +5,14 @@ class Klomp
     class Frame
       def name; @name ||= self.class.name.split('::').last.upcase; end
 
-      def headers;         @headers ||= {};       end
-      def [](key);          headers[key];         end
-      def []=(key, value);  headers[key] = value; end
+      def new_headers
+        # Dependency injection point for tests.
+        {}
+      end
+
+      def headers;          @headers ||= new_headers; end
+      def [](key);          headers[key];             end
+      def []=(key, value);  headers[key] = value;     end
 
       def body; @body ||= ""; end
       def body=(b); @body = b; end
@@ -44,7 +49,7 @@ class Klomp
 
       def parse_headers(data)
         frame = nil
-        {}.tap do |headers|
+        new_headers.tap do |headers|
           data.lines.each do |line|
             next if line == "\n"
             unless frame
