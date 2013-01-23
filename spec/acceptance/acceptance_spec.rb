@@ -16,7 +16,7 @@ describe "Klomp acceptance", :acceptance => true do
 
   context "publish" do
 
-    When { klomp.publish "/queue/greeting", "hello" }
+    When { klomp.publish("/queue/greeting", "hello") }
 
     Then do
       vhosts = apollo_api_get_json "/broker/virtual-hosts.json"

@@ -54,7 +54,7 @@ module RSpec::Matchers::HaveReceived
     def initialize(message, expected_from)
       @message, @mock = message, RSpec::Mocks::Mock.new
       @mock.stub!(message)
-      @expectation = @mock.should_receive(message, expected_from: expected_from)
+      @expectation = @mock.should_receive(message, expected_from => expected_from)
     end
 
     def matches?(actual)

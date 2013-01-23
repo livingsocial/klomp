@@ -14,7 +14,7 @@ class Klomp
   def publish(queue, body, headers = {})
     connections_remaining = connections.dup
     begin
-      conn = connections_remaining.sample
+      conn = connections_remaining[rand(connections_remaining.size)]
       conn.publish(queue, body, headers)
     rescue
       connections_remaining.delete conn
