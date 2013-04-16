@@ -49,6 +49,7 @@ class Klomp
   end
 end
 
+require 'klomp/subscription'
 require 'klomp/connection'
 require 'klomp/sentinel'
 require 'klomp/frames'

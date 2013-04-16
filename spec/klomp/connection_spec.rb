@@ -137,7 +137,7 @@ describe Klomp::Connection do
 
       When { connection.subscribe("/queue/foo", subscriber) }
 
-      Then { connection.subscriptions["/queue/foo"].should == subscriber }
+      Then { connection.subscriptions["/queue/foo"].subscriber.should == subscriber }
 
     end
 
@@ -163,7 +163,8 @@ describe Klomp::Connection do
 
       Then do
         Klomp::Frames::Subscribe.should have_received(:new).with("/queue/foo", headers)
-        connection.subscriptions["/queue/foo"].should == subscriber
+        connection.subscriptions["/queue/foo"].subscriber.should == subscriber
+        connection.subscriptions["/queue/foo"].headers.should == headers
       end
 
     end

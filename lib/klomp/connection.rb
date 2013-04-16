@@ -45,10 +45,10 @@ class Klomp
       raise Klomp::Error, "no subscriber provided" unless subscriber || block
       raise Klomp::Error, "subscriber does not respond to #call" if subscriber && !subscriber.respond_to?(:call)
       previous = subscriptions[queue]
-      subscriptions[queue] = subscriber || block
+      subscriptions[queue] = Subscription.new(subscriber || block, headers)
       frame = Frames::Subscribe.new(queue, headers)
       if previous
-        frame.previous_subscriber = previous
+        frame.previous_subscriber = previous.subscriber
       else
         write frame
       end
@@ -80,7 +80,9 @@ class Klomp
       connect
       subs = subscriptions.dup
       subscriptions.clear
-      subs.each {|queue, subscriber| subscribe(queue, subscriber) }
+      subs.each do |queue, subscription|
+        subscribe(queue, subscription.subscriber, subscription.headers)
+      end
       @sentinel = nil
     ensure
       @subscriptions = subs if subs && subs.size != @subscriptions.size
@@ -157,8 +159,8 @@ class Klomp
           begin
             message = read Frames::Message
             raise Error, message.headers['message'] if message.error?
-            if subscriber = subscriptions[message.headers['destination']]
-              subscriber.call message
+            if subscription = subscriptions[message.headers['destination']]
+              subscription.call(message)
             end
           rescue INTERRUPT
             break
