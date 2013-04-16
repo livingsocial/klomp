@@ -32,7 +32,7 @@ class Klomp
       connect
     end
 
-    def publish(queue, body, headers={})
+    def publish(queue, body, headers = {})
       write Frames::Send.new(queue, body, headers)
     end
 
