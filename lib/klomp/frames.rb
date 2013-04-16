@@ -87,7 +87,7 @@ class Klomp
     class Send < Frame
       def initialize(queue, body, hdrs)
         headers['destination'] = queue
-        headers.update(hdrs.reject{|k,v| %w(destination content-length).include? k })
+        headers.update(hdrs.stringify_keys.reject{ |k,v| %w(destination content-length).include? k })
         headers['content-type'] ||= 'text/plain'
         headers['content-length'] = body.bytesize.to_s
         @body = body
@@ -96,16 +96,18 @@ class Klomp
 
     class Subscribe < Frame
       attr_accessor :previous_subscriber
-      def initialize(queue)
+      def initialize(queue, hdrs = {})
         headers['id'] = queue
         headers['destination'] = queue
         headers['ack'] = 'auto'
+        headers.update(hdrs.stringify_keys.reject{ |k,v| %w(id destination ack).include? k })
       end
     end
 
     class Unsubscribe < Frame
-      def initialize(queue)
+      def initialize(queue, hdrs = {})
         headers['id'] = queue
+        headers.update(hdrs.stringify_keys.reject{ |k,v| %w(id).include? k })
       end
     end
 

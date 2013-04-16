@@ -23,17 +23,18 @@ class Klomp
     end
   end
 
-  def subscribe(queue, subscriber = nil, &block)
-    connections.map {|conn| conn.subscribe(queue, subscriber, &block) }
+
+  def subscribe(queue, subscriber = nil, headers = {}, &block)
+    connections.map {|conn| conn.subscribe(queue, subscriber, headers, &block) }
   end
 
-  def unsubscribe(queue)
+  def unsubscribe(queue, headers = {})
     if Array === queue
       raise ArgumentError,
         "wrong size array for #{connections.size} (#{queue.size})" unless connections.size == queue.size
-      connections.zip(queue).map {|conn,arg| conn.unsubscribe arg rescue nil }
+      connections.zip(queue).map {|conn,arg| conn.unsubscribe(arg, headers) rescue nil }
     else
-      connections.map {|conn| conn.unsubscribe(queue) rescue nil }
+      connections.map {|conn| conn.unsubscribe(queue, headers) rescue nil }
     end
   end
 

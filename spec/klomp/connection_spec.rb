@@ -141,6 +141,33 @@ describe Klomp::Connection do
 
     end
 
+    context "and accepts custom headers" do
+
+      Given(:headers) { { :foo => "bar" } }
+
+      Given  { Klomp::Frames::Subscribe.stub!(:new => Klomp::Frames::Subscribe.new("/queue/foo")) }
+
+      When { connection.subscribe("/queue/foo", subscriber, headers) }
+
+      Then { Klomp::Frames::Subscribe.should have_received(:new).with("/queue/foo", headers) }
+
+    end
+
+    context "and accepts custom headers plus subscriber object" do
+
+      Given(:headers) { { :foo => "bar" } }
+
+      Given  { Klomp::Frames::Subscribe.stub!(:new => Klomp::Frames::Subscribe.new("/queue/foo")) }
+
+      When { connection.subscribe("/queue/foo", subscriber, headers) }
+
+      Then do
+        Klomp::Frames::Subscribe.should have_received(:new).with("/queue/foo", headers)
+        connection.subscriptions["/queue/foo"].should == subscriber
+      end
+
+    end
+
     context "and dispatches to the message callback" do
 
       When do

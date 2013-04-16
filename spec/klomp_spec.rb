@@ -117,7 +117,7 @@ describe Klomp do
 
       When(:result) { klomp.subscribe("/queue/greeting") { true } }
 
-      Then { connections.values.each {|conn| conn.should have_received(:subscribe).with("/queue/greeting", nil) } }
+      Then { connections.values.each {|conn| conn.should have_received(:subscribe).with("/queue/greeting", nil, {}) } }
 
       context "and returns the results of all Connection#subscribe as an array" do
 
@@ -147,7 +147,7 @@ describe Klomp do
 
       When(:result) { klomp.unsubscribe("/queue/greeting") }
 
-      Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting") } }
+      Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting", {}) } }
 
       context "and returns the results of all Connection#unsubscribe as an array" do
 
@@ -163,7 +163,7 @@ describe Klomp do
 
       When { klomp.unsubscribe("/queue/greeting") }
 
-      Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting") } }
+      Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with("/queue/greeting", {}) } }
 
     end
 
@@ -177,7 +177,7 @@ describe Klomp do
 
         When { klomp.unsubscribe arg }
 
-        Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with(42) } }
+        Then { connections.values.each {|conn| conn.should have_received(:unsubscribe).with(42, {}) } }
 
       end
 

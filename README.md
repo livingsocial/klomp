@@ -38,6 +38,10 @@ end
 klomp.subscribe("/queue/klomp", Klompen.new)
 klomp.unsubscribe("/queue/klomp")
 
+# subscribe with custom headers
+klomp.subscribe("/queue/klomp", Klompen.new, :persistent => :true)
+klomp.subscribe("/queue/klomp", :persistent => :true) do ... end
+
 klomp.disconnect
 ```
 

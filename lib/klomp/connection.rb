@@ -36,12 +36,17 @@ class Klomp
       write Frames::Send.new(queue, body, headers)
     end
 
-    def subscribe(queue, subscriber = nil, &block)
+    def subscribe(queue, subscriber = nil, headers = {}, &block)
+      if subscriber.is_a?(Hash)
+        headers = subscriber
+        subscriber = nil
+      end
+
       raise Klomp::Error, "no subscriber provided" unless subscriber || block
       raise Klomp::Error, "subscriber does not respond to #call" if subscriber && !subscriber.respond_to?(:call)
       previous = subscriptions[queue]
       subscriptions[queue] = subscriber || block
-      frame = Frames::Subscribe.new(queue)
+      frame = Frames::Subscribe.new(queue, headers)
       if previous
         frame.previous_subscriber = previous
       else
@@ -51,9 +56,9 @@ class Klomp
       frame
     end
 
-    def unsubscribe(queue)
+    def unsubscribe(queue, headers = {})
       queue = queue.headers['destination'] if Frames::Subscribe === queue
-      write Frames::Unsubscribe.new(queue) if subscriptions.delete queue
+      write Frames::Unsubscribe.new(queue, headers) if subscriptions.delete queue
     end
 
     def connected?()    @socket end
