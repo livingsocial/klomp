@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "klomp"
-  s.version = "1.0.8.20130416172757"
+  s.version = "1.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nick Sieger"]
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.description = "Klomp is a simple [Stomp] messaging client that keeps your sanity intact.\n\nThe purpose of Klomp is to be the simplest possible Stomp client. No in-memory\nbuffering of outgoing messages, no fanout subscriptions in-process, no\ntransactions, no complicated messaging patterns. Code simple enough so that when\nsomething goes wrong, the problem is obvious.\n\n[Stomp]: http://stomp.github.com/"
   s.email = ["nick.sieger@livingsocial.com"]
   s.extra_rdoc_files = ["Manifest.txt"]
-  s.files = [".gemtest", ".rspec", ".simplecov", "ChangeLog.md", "Gemfile", "Gemfile.lock", "Manifest.txt", "README.md", "Rakefile", "klomp.gemspec", "lib/klomp.rb", "lib/klomp/connection.rb", "lib/klomp/frames.rb", "lib/klomp/sentinel.rb", "spec/acceptance/acceptance_spec.rb", "spec/acceptance/reconnect_spec.rb", "spec/frames/auth_error.txt", "spec/frames/connect.txt", "spec/frames/connect_vhost.txt", "spec/frames/connected.txt", "spec/frames/disconnect.txt", "spec/frames/error.txt", "spec/frames/greeting.txt", "spec/frames/message.txt", "spec/frames/receipt.txt", "spec/frames/subscribe.txt", "spec/frames/unsubscribe.txt", "spec/klomp/connection_spec.rb", "spec/klomp/frames_spec.rb", "spec/klomp/sentinel_spec.rb", "spec/klomp_spec.rb", "spec/spec_helper.rb", "spec/support/have_received.rb", "spec/support/shared_contexts.rb"]
+  s.files = [".gemtest", ".rspec", ".simplecov", "ChangeLog.md", "Gemfile", "Gemfile.lock", "Manifest.txt", "README.md", "Rakefile", "klomp.gemspec", "lib/klomp.rb", "lib/klomp/connection.rb", "lib/klomp/frames.rb", "lib/klomp/sentinel.rb", "lib/klomp/subscription.rb", "spec/acceptance/acceptance_spec.rb", "spec/acceptance/reconnect_spec.rb", "spec/frames/auth_error.txt", "spec/frames/connect.txt", "spec/frames/connect_vhost.txt", "spec/frames/connected.txt", "spec/frames/disconnect.txt", "spec/frames/error.txt", "spec/frames/greeting.txt", "spec/frames/message.txt", "spec/frames/receipt.txt", "spec/frames/subscribe.txt", "spec/frames/unsubscribe.txt", "spec/klomp/connection_spec.rb", "spec/klomp/frames_spec.rb", "spec/klomp/sentinel_spec.rb", "spec/klomp_spec.rb", "spec/spec_helper.rb", "spec/support/have_received.rb", "spec/support/shared_contexts.rb"]
   s.homepage = "http://github.com/livingsocial/klomp"
   s.rdoc_options = ["--main", "README.md"]
   s.require_paths = ["lib"]
