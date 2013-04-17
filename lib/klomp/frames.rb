@@ -26,6 +26,12 @@ class Klomp
           pair.map {|x| x.to_s.gsub("\n","\\n").gsub(":","\\c").gsub("\\", "\\\\") }.join(':')
         end.join("\n").tap {|s| s << "\n" unless s.empty? }
       end
+
+      def stringify_headers(hdrs)
+        new_hdrs = {}
+        hdrs.each { |k, v| new_hdrs[k.to_s] = v }
+        new_hdrs
+      end
     end
 
     class ServerFrame < Frame
@@ -87,7 +93,7 @@ class Klomp
     class Send < Frame
       def initialize(queue, body, hdrs)
         headers['destination'] = queue
-        headers.update(hdrs.stringify_keys.reject{ |k,v| %w(destination content-length).include? k })
+        headers.update(stringify_headers(hdrs).reject { |k,v| %w(destination content-length).include? k })
         headers['content-type'] ||= 'text/plain'
         headers['content-length'] = body.bytesize.to_s
         @body = body
@@ -97,7 +103,7 @@ class Klomp
     class Subscribe < Frame
       attr_accessor :previous_subscriber
       def initialize(queue, hdrs = {})
-        headers.update(hdrs.stringify_keys.reject{ |k,v| %w(destination ack).include? k })
+        headers.update(stringify_headers(hdrs).reject { |k,v| %w(destination ack).include? k })
         headers['id'] ||= queue
         headers['destination'] = queue
         headers['ack'] = 'auto'
@@ -107,7 +113,7 @@ class Klomp
     class Unsubscribe < Frame
       def initialize(queue, hdrs = {})
         headers['id'] = queue
-        headers.update(hdrs.stringify_keys.reject{ |k,v| %w(id).include? k })
+        headers.update(stringify_headers(hdrs).reject { |k,v| %w(id).include? k })
       end
     end
 
