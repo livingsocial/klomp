@@ -1,7 +1,7 @@
 require 'bundler/setup'
 require 'hoe'
 
-Hoe.plugin :bundler, :git, :gemspec, :gemcutter
+Hoe.plugin :bundler, :git, :gemspec, :gemcutter, :travis
 
 Hoe.spec 'klomp' do
   developer 'Nick Sieger', 'nick.sieger@livingsocial.com'
@@ -16,6 +16,7 @@ Hoe.spec 'klomp' do
   self.extra_dev_deps << [ 'hoe-bundler',   '~> 1.2.0'  ]
   self.extra_dev_deps << [ 'hoe-gemspec',   '~> 1.0.0'  ]
   self.extra_dev_deps << [ 'hoe-git',       '~> 1.5.0'  ]
+  self.extra_dev_deps << [ 'hoe-travis',    '= 1.2'     ]
   self.extra_dev_deps << [ 'rspec',         '~> 2.11.0' ]
   self.extra_dev_deps << [ 'autotest-standalone', '~> 4.5.0'  ]
   self.extra_dev_deps << [ 'rspec-given',   '~> 1.5.0'  ]
