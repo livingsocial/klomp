@@ -12,6 +12,8 @@ Hoe.spec 'klomp' do
 
   self.clean_globs << 'spec/reports'
 
+  license 'MIT'
+
   ### dependencies!
   self.extra_dev_deps << [ 'hoe-bundler',   '~> 1.2.0'  ]
   self.extra_dev_deps << [ 'hoe-gemspec',   '~> 1.0.0'  ]
