@@ -41,3 +41,5 @@ module Hoe::Bundler
 end
 
 require 'ci/reporter/rake/rspec'
+
+task :travis => :spec
