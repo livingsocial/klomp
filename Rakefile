@@ -13,11 +13,11 @@ Hoe.spec 'klomp' do
   self.clean_globs << 'spec/reports'
 
   ### dependencies!
-  self.extra_dev_deps << [ 'hoe-bundler',   '~> 1.1.0'  ]
+  self.extra_dev_deps << [ 'hoe-bundler',   '~> 1.2.0'  ]
   self.extra_dev_deps << [ 'hoe-gemspec',   '~> 1.0.0'  ]
   self.extra_dev_deps << [ 'hoe-git',       '~> 1.5.0'  ]
   self.extra_dev_deps << [ 'rspec',         '~> 2.11.0' ]
-  self.extra_dev_deps << [ 'ZenTest',       '~> 4.8.0'  ]
+  self.extra_dev_deps << [ 'autotest-standalone', '~> 4.5.0'  ]
   self.extra_dev_deps << [ 'rspec-given',   '~> 1.0'    ]
   self.extra_dev_deps << [ 'simplecov',     '~> 0.6.0'  ]
   self.extra_dev_deps << [ 'em-proxy',      '~> 0.1.0'  ]
