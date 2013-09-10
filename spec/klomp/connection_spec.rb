@@ -10,7 +10,7 @@ describe Klomp::Connection do
   Given(:thread)     { double Thread }
   Given(:sentinel)   { double Klomp::Sentinel, :alive? => true }
   Given(:options)    {
-    hsh = ActiveSupport::OrderedHash.new
+    hsh = OrderedHash.new
     hsh['login']    = 'admin'
     hsh['passcode'] = 'password'
     hsh['logger']   = logger

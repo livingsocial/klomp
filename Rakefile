@@ -18,11 +18,23 @@ Hoe.spec 'klomp' do
   self.extra_dev_deps << [ 'hoe-git',       '~> 1.5.0'  ]
   self.extra_dev_deps << [ 'rspec',         '~> 2.11.0' ]
   self.extra_dev_deps << [ 'autotest-standalone', '~> 4.5.0'  ]
-  self.extra_dev_deps << [ 'rspec-given',   '~> 1.0'    ]
+  self.extra_dev_deps << [ 'rspec-given',   '~> 1.5.0'  ]
   self.extra_dev_deps << [ 'simplecov',     '~> 0.6.0'  ]
   self.extra_dev_deps << [ 'em-proxy',      '~> 0.1.0'  ]
   self.extra_dev_deps << [ 'ci_reporter',   '~> 1.7.0'  ]
-  self.extra_dev_deps << [ 'activesupport', '>= 2.3.0'  ]
+end
+
+module Hoe::Bundler
+  alias_method :orig_hoe_bundler_contents, :hoe_bundler_contents
+
+  GEMFILE_APPENDIX = %{
+    gem 'activesupport', ['>= 2.3.0', '< 4.0.0'], :group => [:development, :test], :platforms => :ruby_18
+  }
+
+  def hoe_bundler_contents
+    contents = orig_hoe_bundler_contents
+    contents.sub(/^(# vim: syntax=ruby)/, "#{GEMFILE_APPENDIX.strip}\n\\1")
+  end
 end
 
 require 'ci/reporter/rake/rspec'
